@@ -50,7 +50,7 @@ export default function TabLayout() {
           overflow: "hidden",
           borderWidth: 1,
           paddingHorizontal: 20,
-          borderColor: "#none",
+          borderColor: "#1F1D2B",
         }
       }}
     >

@@ -1,8 +1,6 @@
-import { Image, Text, TouchableOpacity, View } from 'react-native';
-// import { icons } from '../../constants/icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import arrowback from '../../assets/icons/arrow-back.png';
-import heart from '../../assets/icons/heart.png';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Icons } from '../../constants/icons';
 
 const Details = () => {
     return (
@@ -10,13 +8,13 @@ const Details = () => {
             {/* Movie Header */}
             <View className="flex-row w-full items-center justify-between px-4 py-4 bg-transparent">
                 <TouchableOpacity className="p-2">
-                    <Image source={arrowback} width={24} height={24} color="white" />
+                    <Image source={Icons.arrowBack} width={24} height={24} color="white" />
                 </TouchableOpacity>
                 <Text className="text-white text-h3 font-bold mx-2 flex-1 text-center" numberOfLines={1}>
                     Spider-Man: No Way Home
                 </Text>
                 <TouchableOpacity className="p-2">
-                    <Image source={heart} width={24} height={24} color="" className="" />
+                    <Image source={Icons.heart} width={24} height={24} color="" className="" />
                 </TouchableOpacity>
             </View>
             {/* Movie Poster */}

@@ -2,14 +2,14 @@ import { Link } from '@react-navigation/native'
 import { ScrollView, Text, View } from 'react-native'
 import MovieCard from './MovieCard'
 
-const FeaturedMovies = ({title, movies}) => {
+const FeaturedMovies = ({title, movies, series}) => {
     return (
         <View>
             <View className="mt-8">
                 <View className="flex-row justify-between items-center mb-[16px]">
-                    <Text className="text-h3 text-white font-bold">{title}</Text>
+                    <Text className="text-h4 text-white font-bold">{title}</Text>
                     <Link href="/popular">
-                        <Text className=" text-blue_accent">See All</Text>
+                        <Text className=" text-h6 text-blue_accent">See All</Text>
                     </Link>
                 </View>
 
@@ -21,6 +21,7 @@ const FeaturedMovies = ({title, movies}) => {
                             title={item.title}
                             genre={item.genre}
                             imageUrl={item.imageUrl}
+                            series={series}
                         />
                     ))}
                 </ScrollView>

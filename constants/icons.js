@@ -39,6 +39,7 @@ import padlock1 from '@/assets/icons/padlock 1.png'
 import pause from '@/assets/icons/pause.png'
 import person1 from '@/assets/icons/person (1).png'
 import person from '@/assets/icons/person.png'
+import PlayButton from '@/assets/icons/play-button.png'
 import profile1 from '@/assets/icons/profile 1.png'
 import profile from '@/assets/icons/profile.png'
 import question21 from '@/assets/icons/question (2) 1.png'
@@ -106,4 +107,5 @@ export const Icons = {
     trashBin1,
     workspacePremiumBlack24dp1,
     logo,
+    PlayButton,
 }

@@ -6,8 +6,8 @@ export const TabIcon = ({ focused, icon, title }) => {
   if (focused) {
     return (
       <>
-        <View className='flex-row items-center justify-center bg-soft min-w-[100px] pr-[4px] rounded-[15px] h-[40px]'>
-          <Image source={icon} tintColor="#12CDD9" className="w-6" />
+        <View className='flex-row items-center justify-center min-w-[100px] pr-[4px] rounded-[15px] h-[60px]'>
+          <Image source={icon} tintColor="#EAAB73" className="w-8 h-8" />
           {/* <Text className="text-secondary text-[16px] text-blue_accent font-semibold ml-[8px]">
             {title}
           </Text> */}
@@ -18,7 +18,7 @@ export const TabIcon = ({ focused, icon, title }) => {
   return (
 
     <View className='flex-row items-center justify-center'>
-      <Image source={icon} tintColor="#fff" className="h-[20px]" />
+          <Image source={icon} tintColor="#fff" className="w-8 h-8" />
     </View>
   )
 }
@@ -27,30 +27,30 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: 'blue',
+        // tabBarActiveTintColor: 'blue',
         tabBarShowLabel: false,
         headerShown: false,
-
         tabBarItemStyle: {
           display: "flex",
           width: "100%",
           height: "100%",
           justifyContent: "center",
           alignItems: "center",
-          padding: 20,
+          // padding: 20,
           paddingVertical: 15,
         },
         tabBarStyle: {
           backgroundColor: "#1F1D2B",
           // borderRadius: 50,
-          // marginHorizontal: 20,
-          marginBottom: 36,
+          marginHorizontal: 10,
+          marginBottom: 40,
           height: 60,
           position: "absolute",
           overflow: "hidden",
           borderWidth: 1,
-          paddingHorizontal: 20,
-          borderColor: "#1F1D2B",
+          // paddingHorizontal: 20,
+          borderColor: "#252836",
+          borderRadius: 40,
         }
       }}
     >

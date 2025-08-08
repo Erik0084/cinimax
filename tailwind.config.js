@@ -5,9 +5,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        dark: "#1F1D2B",
+        dark: "#171725",
         soft: "#252836",
-        blue_accent: "#12CDD9",
+        blue_accent: "#ddcc8e",
         green: "#22B07D",
         orange: "#FF8700",
         red: "#FB4141",
@@ -34,6 +34,6 @@ module.exports = {
         mono: ['Fira Code', 'monospace'],
       },
     },
-  },
+  },  
   plugins: [],
 };

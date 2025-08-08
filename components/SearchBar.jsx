@@ -10,18 +10,20 @@ export default function SearchBar() {
         source={Icons.search}
         className="w-6 h-6 mr-2 color-grey"
         resizeMode="contain"
+        tintColor="#fff"
       />
       <TextInput
-        className="flex-1 text-h5 text-grey"
+        className="flex-1 text-h6 text-grey"
         placeholder="Search a movie.."
-        placeholderTextColor="#A1A1AA"
+        placeholderTextColor="#ccc"
         underlineColorAndroid="transparent"
       />
       <View className="w-px h-6 bg-gray-600 mx-3 opacity-40" />
       <Image
-        source={Icons.option}
+        source={Icons.options}
         className="w-6 h-6 color-white"
         resizeMode="contain"
+        tintColor="#EAAB73"
       />
     </View>
   );

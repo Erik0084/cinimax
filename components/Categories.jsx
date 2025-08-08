@@ -9,7 +9,7 @@ const Categories = ({ title }) => {
     return (
         <View className="my-0">
             {title && (
-                <Text className="text-h3 text-white font-bold mb-[16px]">{title}</Text>
+                <Text className="text-h4 text-white font-bold mb-[16px]">{title}</Text>
             )}
             <ScrollView
                 horizontal
@@ -19,11 +19,11 @@ const Categories = ({ title }) => {
                 {categories.map((category) => (
                     <TouchableOpacity
                         key={category}
-                        className={`py-[8px] mr-2 rounded-[10px] min-w-[80px] flex-row gap-2 justify-center ${activeCategory === category ? 'bg-soft' : 'bg-none'
+                        className={`py-[8px] mr-2 rounded-lg min-w-[80px] flex-row gap-2 justify-center ${activeCategory === category ? 'bg-soft' : 'bg-none'
                             }`}
                         onPress={() => setActiveCategory(category)}
                     >
-                        <Text className={`text-h5 ${activeCategory === category ? 'text-blue_accent font-semibold' : 'text-white font-semibold'
+                        <Text className={`text-h6 ${activeCategory === category ? 'text-white font-semibold' : 'text-white font-semibold'
                             }`}>
                             {category}
                         </Text>

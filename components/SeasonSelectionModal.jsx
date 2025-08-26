@@ -1,28 +1,23 @@
 import { FlatList, Image, Modal, Text, TouchableOpacity, View } from 'react-native';
 import { Icons } from '../constants/icons';
 
-const seasons = [
-    { id: '1', name: 'Season 1' },
-    { id: '2', name: 'Season 2' },
-    { id: '3', name: 'Season 3' },
-    { id: '4', name: 'Season 4' },
-    { id: '5', name: 'Season 5' },
-];
-
-const SeasonSelectionModal = ({ visible, onClose, onSelectSeason }) => {
-    const renderItem = ({ item }) => (
-        <TouchableOpacity
-            className="py-3 items-center"
-            onPress={() => {
-                onSelectSeason(item.name);
-                onClose();
-            }}
-        >
-            <Text className={`text-h4 ${item.name === 'Season 1' ? 'text-white font-bold' : 'text-grey'}`}>
-                {item.name}
-            </Text>
-        </TouchableOpacity>
-    );
+const SeasonSelectionModal = ({ visible, onClose, onSelectSeason, currentSeason, seasons = [] }) => {
+    const renderItem = ({ item }) => {
+        const isSelected = currentSeason?.Id === item.Id;
+        return (
+            <TouchableOpacity
+                className="py-3 items-center"
+                onPress={() => {
+                    onSelectSeason(item);
+                    onClose();
+                }}
+            >
+                <Text className={`text-h4 ${isSelected ? 'text-white font-bold' : 'text-grey'}`}>
+                    {item.Name}
+                </Text>
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <Modal
@@ -36,12 +31,16 @@ const SeasonSelectionModal = ({ visible, onClose, onSelectSeason }) => {
                     <TouchableOpacity onPress={onClose} className="absolute top-3 right-3 p-2">
                         <Image source={Icons.remove} className="w-5 h-5" tintColor="#fff" />
                     </TouchableOpacity>
-                    <FlatList
-                        data={seasons}
-                        renderItem={renderItem}
-                        keyExtractor={(item) => item.id}
-                        ItemSeparatorComponent={() => <View className="h-[1px] bg-gray-700 my-2" />}
-                    />
+                    {seasons.length > 0 ? (
+                        <FlatList
+                            data={seasons}
+                            renderItem={renderItem}
+                            keyExtractor={(item) => item.Id}
+                            ItemSeparatorComponent={() => <View className="h-[1px] bg-gray-700 my-2" />}
+                        />
+                    ) : (
+                        <Text className="text-grey text-center py-4">No seasons available</Text>
+                    )}
                 </View>
             </View>
         </Modal>

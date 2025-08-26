@@ -13,9 +13,9 @@ const JellyfinPlayer = () => {
 
   // Jellyfin configuration
   const JELLYFIN_CONFIG = {
-    serverUrl: 'https://0c125de6cb32.ngrok-free.app',
-    itemId: '5c5609109bd4f8b05a276c3e812d39dc',
-    apiKey: '4a8f78d0e0eb4b7f8957732ee343a3b0', // Replace with your API key
+    serverUrl: process.env.SERVER_URL,
+    itemId: '5c5609109bd4f8b05a276c3e812d39dc',  
+    apiKey: process.env.API_KEY, // Replace with your API key
     userId: '5c5609109bd4f8b05a276c3e812d39dc', // Replace with your user ID
   };
 
@@ -26,6 +26,8 @@ const JellyfinPlayer = () => {
         
         // Method 1: Try direct stream URL
         const directStreamUrl = `${serverUrl}/Videos/${itemId}/stream?static=true&api_key=${apiKey}`;
+
+        console.log("directStreamUrl", directStreamUrl);
         
         // Method 2: Try transcoding URL (more compatible)
         const transcodingUrl = `${serverUrl}/Videos/${itemId}/main.m3u8?api_key=${apiKey}&playSessionId=${Date.now()}&mediaSourceId=${itemId}`;
@@ -36,7 +38,7 @@ const JellyfinPlayer = () => {
         console.log('Trying direct stream URL:', directStreamUrl);
         
         // Test the URL first
-        const response = await fetch(directStreamUrl, {
+        const response = await fetch(directStreamUrl, {  
           method: 'HEAD',
           headers: {
             'Authorization': `MediaBrowser Token="${apiKey}"`,

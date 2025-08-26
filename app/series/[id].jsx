@@ -1,21 +1,46 @@
 // app/series/[id].jsx
 
+import { useLocalSearchParams } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { useEffect, useState } from "react";
 import {
-    Image,
-    ImageBackground,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ImageBackground,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import EpisodeList from "../../components/EpisodeCard";
 import JellyfinPlayer from "../../components/Global/Player";
 import { Icons } from "../../constants/icons";
+import { fetchAllSeries, JELLYFIN_URL } from "../../utils/useJellyfin";
 
 const SeriesDetail = () => {
+  const { id } = useLocalSearchParams();
   const [isPlaying, setIsPlaying] = useState(false);
+  const [seriesData, setSeriesData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch series data
+  useEffect(() => {
+    const loadSeriesData = async () => {
+      try {
+        setLoading(true);
+        const allSeries = await fetchAllSeries();
+        const series = allSeries.find(s => s.Id === id);
+        setSeriesData(series);
+      } catch (error) {
+        console.error('Failed to fetch series data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      loadSeriesData();
+    }
+  }, [id]);
 
   // Ensure this screen is always portrait when not playing video
   useEffect(() => {
@@ -61,7 +86,9 @@ const SeriesDetail = () => {
         <View className="w-full h-full relative">
           <ImageBackground
             source={{
-              uri: "https://i.pinimg.com/736x/43/4c/4a/434c4a4819c0c21d3c3895530e90d19a.jpg",
+              uri: seriesData?.BackdropImageTags?.[0] 
+                ? `${JELLYFIN_URL}/Items/${seriesData.Id}/Images/Backdrop/0?tag=${seriesData.BackdropImageTags[0]}`
+                : "https://i.pinimg.com/736x/43/4c/4a/434c4a4819c0c21d3c3895530e90d19a.jpg",
             }}
             className="w-full h-full absolute top-0 left-0 right-0"
             resizeMode="cover"
@@ -71,7 +98,9 @@ const SeriesDetail = () => {
         <View className="absolute bottom-0 left-0 right-0 top-0 mt-12 items-center justify-center">
           <Image
             source={{
-              uri: "https://i.pinimg.com/736x/c3/f1/06/c3f1068e18413f10bae29d50ee10b8af.jpg",
+              uri: seriesData?.ImageTags?.Primary 
+                ? `${JELLYFIN_URL}/Items/${seriesData.Id}/Images/Primary?tag=${seriesData.ImageTags.Primary}`
+                : "https://i.pinimg.com/736x/c3/f1/06/c3f1068e18413f10bae29d50ee10b8af.jpg",
             }}
             className="w-[220px] h-auto rounded-xl"  
             style={{ aspectRatio: "2/3" }}
@@ -84,19 +113,19 @@ const SeriesDetail = () => {
                   className="w-4 h-4 mr-[5px]"
                   tintColor="#92929D"
                 />
-                <Text className="text-grey text-h5 mr-4">2021</Text>
+                <Text className="text-grey text-h5 mr-4">{seriesData?.ProductionYear || 'N/A'}</Text>
                 <Image
                   source={Icons.clock}
                   className="w-4 h-4 mr-[5px]"
                   tintColor="#92929D"
                 />
-                <Text className="text-grey text-h5 mr-4">148 Minutes</Text>
+                <Text className="text-grey text-h5 mr-4">{seriesData?.RunTimeTicks ? Math.round(seriesData.RunTimeTicks / 600000000) + ' Minutes' : 'N/A'}</Text>
                 <Image
                   source={Icons.film}
                   className="w-4 h-4 mr-[5px]"
                   tintColor="#92929D"
                 />
-                <Text className="text-grey text-h5 mr-4">Action</Text>
+                <Text className="text-grey text-h5 mr-4">{seriesData?.GenreItems?.[0]?.Name || 'N/A'}</Text>
               </View>
               <View className="flex-row items-center">
                 <Image
@@ -104,7 +133,7 @@ const SeriesDetail = () => {
                   className="w-4 h-4 mr-1"
                   tintColor="#FF8700"
                 />
-                <Text className="text-orange text-h5 mr-4">4.5</Text>
+                <Text className="text-orange text-h5 mr-4">{seriesData?.CommunityRating ? seriesData.CommunityRating.toFixed(1) : 'N/A'}</Text>
               </View>
             </View>
 
@@ -141,16 +170,14 @@ const SeriesDetail = () => {
 
       {/* Story Line */}
       <View className="mt-6 px-6">
-        <Text className="text-white text-h3 font-bold mb-2">Story Line</Text>
+        <Text className="text-white text-h3 font-bold mb-2">{seriesData?.Name}</Text>
         <Text className="text-grey text-h5 leading-6" numberOfLines={4}>
-          Originally a story from Archie Comics which started in 1941, Riverdale
-          centres around a group of high school students who are shocked by the
-          death of classmate, Jason Blossom. Together they unravel the secrets of
-          Riverdale and who <Text className="text-primary">More</Text>
+          {seriesData?.Overview || 'No overview available for this series.'}
+          {seriesData?.Overview && <Text className="text-primary"> More</Text>}
         </Text>
       </View>
       <View className="mt-6 px-6 mb-20">
-        <EpisodeList />  
+        <EpisodeList seriesId={id} />  
       </View>
     </ScrollView>
   );

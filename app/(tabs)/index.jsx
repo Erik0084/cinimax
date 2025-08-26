@@ -3,31 +3,32 @@ import SearchBar from "@/components/Home/SearchBarHome";
 import MovieCardFull from "@/components/MovieCardFull";
 import MoviesList from "@/components/MoviesList";
 import Slider from "@/components/Slider";
-import { heroSeries, recommendations } from "@/constants/data/constant";
+import { heroSeries } from "@/constants/data/constant";
+import { fetchAllSeries } from "@/utils/useJellyfin";
 import React, { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 
 export default function Index() {
-  const [movies, setMovies] = useState([]);
-  const getMovies = async () => {
-    const url = "https://e66ee6b7b095.ngrok-free.app";
-    const apiKey = "4a8f78d0e0eb4b7f8957732ee343a3b0";
-    try {
-      const response = await fetch(`${url}/Items?api_key=${apiKey}`);
-      const data = await response.json();
-      setMovies(data?.Items || []);
-      console.log("movies", movies);
-      return data?.Items || [];
-    } catch (error) {
-      console.error("Error fetching movies:", error);
-    }
-  };
+  const [jellyfinSeries, setJellyfinSeries] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // console.log("jellyfinSeries", jellyfinSeries);
 
   useEffect(() => {
-    getMovies();
+    const loadSeries = async () => {
+      try {
+        const series = await fetchAllSeries();
+        // console.log("series", series);      
+        setJellyfinSeries(series);  
+      } catch (error) {  
+        console.error('Failed to fetch series:', error);  
+      } finally {  
+        setLoading(false);
+      }  
+    };
+  
+    loadSeries();
   }, []);
-
-  console.log("Hello from React Native!");
 
   return (
     <>
@@ -49,7 +50,7 @@ export default function Index() {
               <Categories />
               <MoviesList
                 title="Top series for you"
-                movies={recommendations}
+                movies={jellyfinSeries}
                 series={true}
               />
               <View className="pt-8">
@@ -57,7 +58,7 @@ export default function Index() {
               </View>
               <MoviesList
                 title="Recommended for you"
-                movies={recommendations}
+                movies={jellyfinSeries}
                 series={true}
               />
               <View className="pt-12">
@@ -65,7 +66,7 @@ export default function Index() {
               </View>
               <MoviesList
                 title="Top Rated"
-                movies={recommendations}
+                movies={jellyfinSeries}
                 series={true}
               />
             </View>

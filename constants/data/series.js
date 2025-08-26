@@ -221,7 +221,8 @@ export const recommendations = [
     synopsis:
       "The journey of Sultan Salahuddin Ayubi, the liberator of Jerusalem.",
     images: {
-      poster: "https://i.pinimg.com/736x/86/c7/aa/86c7aa5e1efd6626999799fc66ef2085.jpg",
+      poster:
+        "https://i.pinimg.com/736x/86/c7/aa/86c7aa5e1efd6626999799fc66ef2085.jpg",
       banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
     },
     ratings: {
@@ -243,7 +244,8 @@ export const recommendations = [
     country: "TR",
     synopsis: "The story of Osman Bey, the founder of the Ottoman Empire.",
     images: {
-      poster: "https://i.pinimg.com/736x/5b/d9/d6/5bd9d6d6790a47c9b8588ab40c742280.jpg",
+      poster:
+        "https://i.pinimg.com/736x/5b/d9/d6/5bd9d6d6790a47c9b8588ab40c742280.jpg",
       banner: "https://placehold.co/1200x450?text=Osman+Banner",
     },
     ratings: {
@@ -266,7 +268,8 @@ export const recommendations = [
     synopsis:
       "A warrior’s journey to establish justice and a tribe’s future in the shadow of empires.",
     images: {
-      poster: "https://i.pinimg.com/1200x/ab/93/4c/ab934cc1ce1b3cc20b90a557b45517f4.jpg",
+      poster:
+        "https://i.pinimg.com/1200x/ab/93/4c/ab934cc1ce1b3cc20b90a557b45517f4.jpg",
       banner: "https://placehold.co/1200x450?text=Ertugrul+Banner",
     },
     ratings: {
@@ -311,7 +314,8 @@ export const recommendations = [
     synopsis:
       "The valor and struggles of Mehmetçik soldiers during World War I.",
     images: {
-      poster: "https://i.pinimg.com/736x/ae/7a/e4/ae7ae4b85a1039a13d3853ec4e4092f9.jpg",
+      poster:
+        "https://i.pinimg.com/736x/ae/7a/e4/ae7ae4b85a1039a13d3853ec4e4092f9.jpg",
       banner: "https://placehold.co/1200x450?text=Mehmet+Banner",
     },
     ratings: {
@@ -337,7 +341,8 @@ export const heroSeries = [
     synopsis:
       "The journey of Sultan Salahuddin Ayubi, the liberator of Jerusalem.",
     images: {
-      poster: "https://i.pinimg.com/736x/86/c7/aa/86c7aa5e1efd6626999799fc66ef2085.jpg",
+      poster:
+        "https://i.pinimg.com/736x/86/c7/aa/86c7aa5e1efd6626999799fc66ef2085.jpg",
       banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
     },
     ratings: {
@@ -359,7 +364,8 @@ export const heroSeries = [
     country: "TR",
     synopsis: "The story of Osman Bey, the founder of the Ottoman Empire.",
     images: {
-      poster: "https://i.pinimg.com/736x/5b/d9/d6/5bd9d6d6790a47c9b8588ab40c742280.jpg",
+      poster:
+        "https://i.pinimg.com/736x/5b/d9/d6/5bd9d6d6790a47c9b8588ab40c742280.jpg",
       banner: "https://placehold.co/1200x450?text=Osman+Banner",
     },
     ratings: {
@@ -382,7 +388,8 @@ export const heroSeries = [
     synopsis:
       "A warrior’s journey to establish justice and a tribe’s future in the shadow of empires.",
     images: {
-      poster: "https://i.pinimg.com/1200x/ab/93/4c/ab934cc1ce1b3cc20b90a557b45517f4.jpg",
+      poster:
+        "https://i.pinimg.com/1200x/ab/93/4c/ab934cc1ce1b3cc20b90a557b45517f4.jpg",
       banner: "https://placehold.co/1200x450?text=Ertugrul+Banner",
     },
     ratings: {
@@ -427,7 +434,8 @@ export const heroSeries = [
     synopsis:
       "The valor and struggles of Mehmetçik soldiers during World War I.",
     images: {
-      poster: "https://i.pinimg.com/736x/ae/7a/e4/ae7ae4b85a1039a13d3853ec4e4092f9.jpg",
+      poster:
+        "https://i.pinimg.com/736x/ae/7a/e4/ae7ae4b85a1039a13d3853ec4e4092f9.jpg",
       banner: "https://placehold.co/1200x450?text=Mehmet+Banner",
     },
     ratings: {
@@ -435,5 +443,232 @@ export const heroSeries = [
     },
     tags: ["world war", "ottoman army", "valor"],
     seasons_detail: [],
+  },
+];
+
+export const salahuddinSeries = [
+  {
+    id: "trt-0004",
+    isDummy: true,
+    slug: "sultan-salahuddin-ayubi",
+    title: "Sultan Salahuddin Ayubi",
+    genres: ["Historical", "War", "Drama"],
+    languages: ["Urdu"],
+    country: "TR",
+    synopsis:
+      "The journey of Sultan Salahuddin Ayubi, the liberator of Jerusalem in Urdu.",
+    images: {
+      poster:
+        "https://i.pinimg.com/736x/86/c7/aa/86c7aa5e1efd6626999799fc66ef2085.jpg",
+      banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+    },
+    ratings: {
+      user_score: 8.3,
+    },
+    tags: ["jerusalem", "crusades", "leadership"],
+    seasons: [
+      {
+        season_number: 1,
+        episode_count: 30,
+        episodes: [
+          {
+            ep: 1,
+            title: "Episode 1",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 2,
+            title: "Episode 2",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 3,
+            title: "Episode 3",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 4,
+            title: "Episode 4",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 5,
+            title: "Episode 5",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 6,
+            title: "Episode 6",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 7,
+            title: "Episode 7",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 8,
+            title: "Episode 8",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 9,
+            title: "Episode 9",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 10,
+            title: "Episode 10",
+            season_number: 1,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+        ],
+      },
+      {
+        season_number: 2,
+        episode_count: 30,
+        episodes: [
+          {
+            ep: 1,
+            title: "Episode 1",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 2,
+            title: "Episode 2",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 3,
+            title: "Episode 3",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 4,
+            title: "Episode 4",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 5,
+            title: "Episode 5",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 6,
+            title: "Episode 6",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 7,
+            title: "Episode 7",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 8,
+            title: "Episode 8",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 9,
+            title: "Episode 9",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+          {
+            ep: 10,
+            title: "Episode 10",
+            runtime_min: 125,
+            season_number: 2,
+            overview:
+              "Sultan Salahuddin Ayubi, the liberator of Jerusalem, begins his journey.",
+            banner: "https://placehold.co/1200x450?text=Salahuddin+Banner",
+            videoUrl: "https://www.youtube.com/watch?v=1234567890",
+          },
+        ],
+      },
+    ],
   },
 ];

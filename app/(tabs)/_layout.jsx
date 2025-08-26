@@ -1,97 +1,211 @@
-import { Tabs } from 'expo-router';
-import { Image, View } from 'react-native';
-import { Icons } from '../../constants/icons';
-
-export const TabIcon = ({ focused, icon, title }) => {
-  if (focused) {
-    return (
-      <>
-        <View className='flex-row items-center justify-center min-w-[100px] pr-[4px] rounded-[15px] h-[60px]'>
-          <Image source={icon} tintColor="#EAAB73" className="w-8 h-8" />
-          {/* <Text className="text-secondary text-[16px] text-blue_accent font-semibold ml-[8px]">
-            {title}
-          </Text> */}
-        </View>
-      </>
-    )
-  }
-  return (
-
-    <View className='flex-row items-center justify-center'>
-          <Image source={icon} tintColor="#fff" className="w-8 h-8" />
-    </View>
-  )
-}
+// app/(tabs)/_layout.jsx
+import { Tabs } from "expo-router";
+import { Image, View } from "react-native";
+import { icons } from "../../constants/icons";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        // tabBarActiveTintColor: 'blue',
-        tabBarShowLabel: false,
-        headerShown: false,
-        tabBarItemStyle: {
-          display: "flex",
-          width: "100%",
-          height: "100%",
-          justifyContent: "center",
-          alignItems: "center",
-          // padding: 20,
-          paddingVertical: 15,
-        },
+        tabBarActiveTintColor: "#00D4FF",
+        tabBarInactiveTintColor: "#8E8E93",
+        tabBarShowLabel: false, // Hide default labels since we're custom rendering
         tabBarStyle: {
-          backgroundColor: "#1F1D2B",
-          // borderRadius: 50,
-          marginHorizontal: 10,
-          marginBottom: 40,
+          backgroundColor: "#1A1A2E",
+          borderTopWidth: 0,
           height: 60,
+          paddingBottom: 10,
+          paddingTop: 6,
+          paddingHorizontal: 20,
+          // Floating effect styles
           position: "absolute",
-          overflow: "hidden",
-          borderWidth: 1,
-          // paddingHorizontal: 20,
-          borderColor: "#252836",
-          borderRadius: 40,
-        }
+          bottom: 30, // Distance from bottom
+          left: 20, // Left margin
+          right: 20, // Right margin
+          borderRadius: 25, // Rounded corners
+          marginLeft: 10,
+          marginRight: 10,
+          // Shadow for iOS
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 10,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 15,
+          // Elevation for Android
+          elevation: 15,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 5,
+          flex: 1,
+        },
+        headerShown: false,
       }}
     >
-      {/* Tab 1: Home */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={Icons.home} title="Home" />
+          title: "Home",
+          tabBarIcon: ({ color, focused }) => (
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                height: 40,
+                minWidth: focused ? 100 : 40,
+                paddingHorizontal: focused ? 16 : 0,
+                backgroundColor: focused ? "#252836" : "transparent",
+                borderRadius: focused ? 20 : 0,
+                flexDirection: "row",
+              }}
+            >
+              <Image
+                source={icons.home}
+                style={{
+                  width: 22,
+                  height: 22,
+                  tintColor: "#12CDD9",
+                }}
+                resizeMode="contain"
+              />
+              {/* {focused && (
+                <Text style={{
+                  color: '#12CDD9',
+                  fontSize: 14,
+                  fontWeight: '600',
+                  marginLeft: 8,
+                }}>
+                  Home
+                </Text>
+              )} */}
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
-          title: 'Search',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={Icons.search} title="Search" />
+          title: "Search",
+          tabBarIcon: ({ color, focused }) => (
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                height: 40,
+                minWidth: focused ? 100 : 40,
+                paddingHorizontal: focused ? 16 : 0,
+                backgroundColor: focused
+                  ? "rgba(0, 212, 255, 0.2)"
+                  : "transparent",
+                borderRadius: focused ? 20 : 0,
+                flexDirection: "row",
+              }}
+            >
+              <Image
+                source={icons.search}
+                style={{
+                  width: 22,
+                  height: 22,
+                  tintColor: color,
+                }}
+                resizeMode="contain"
+              />
+              {/* {focused && (
+                <Text style={{
+                  color: color,
+                  fontSize: 14,
+                  fontWeight: '600',
+                  marginLeft: 8,
+                }}>
+                  Search
+                </Text>
+              )} */}
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="download"
         options={{
-          title: 'Download',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={Icons.download} title="Download" />
+          title: "Download",
+          tabBarIcon: ({ color, focused }) => (
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                height: 40,
+                minWidth: focused ? 100 : 40,
+                paddingHorizontal: focused ? 16 : 0,
+                backgroundColor: focused
+                  ? "rgba(0, 212, 255, 0.2)"
+                  : "transparent",
+                borderRadius: focused ? 20 : 0,
+                flexDirection: "row",
+              }}
+            >
+              <Image
+                source={icons.download}
+                style={{
+                  width: 22,
+                  height: 22,
+                  tintColor: color,
+                }}
+                resizeMode="contain"
+              />
+              {/* {focused && (
+                <Text style={{
+                  color: color,
+                  fontSize: 14,
+                  fontWeight: '600',
+                  marginLeft: 8,
+                }}>
+                  Download
+                </Text>
+              )} */}
+            </View>
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={Icons.profile} title="Profile" />
+          title: "Profile",
+          tabBarIcon: ({ color, focused }) => (
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                height: 40,
+                minWidth: focused ? 100 : 40,
+                paddingHorizontal: focused ? 16 : 0,
+                backgroundColor: focused
+                  ? "rgba(0, 212, 255, 0.2)"
+                  : "transparent",
+                borderRadius: focused ? 20 : 0,
+                flexDirection: "row",
+              }}
+            >
+              <Image
+                source={icons.profile}
+                style={{
+                  width: 22,
+                  height: 22,
+                  tintColor: color,
+                }}
+                resizeMode="contain"
+              />
+              {/* {focused && (
+                <Text style={{
+                  color: color,
+                  fontSize: 14,
+                  fontWeight: '600',
+                  marginLeft: 8,
+                }}>
+                  Profile
+                </Text>
+              )} */}
+            </View>
           ),
         }}
       />

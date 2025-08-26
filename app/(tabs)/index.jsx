@@ -1,41 +1,33 @@
 import Categories from "@/components/Categories";
+import SearchBar from "@/components/Home/SearchBarHome";
 import MovieCardFull from "@/components/MovieCardFull";
 import MoviesList from "@/components/MoviesList";
-import SearchBar from "@/components/SearchBar";
 import Slider from "@/components/Slider";
-import React from "react";
-
+import { heroSeries, recommendations } from "@/constants/data/constant";
+import React, { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 
 export default function Index() {
+  const [movies, setMovies] = useState([]);
+  const getMovies = async () => {
+    const url = "https://e66ee6b7b095.ngrok-free.app";
+    const apiKey = "4a8f78d0e0eb4b7f8957732ee343a3b0";
+    try {
+      const response = await fetch(`${url}/Items?api_key=${apiKey}`);
+      const data = await response.json();
+      setMovies(data?.Items || []);
+      console.log("movies", movies);
+      return data?.Items || [];
+    } catch (error) {
+      console.error("Error fetching movies:", error);
+    }
+  };
 
-  const recommendations = [
+  useEffect(() => {
+    getMovies();
+  }, []);
 
-    {
-      id: 2,
-      title: 'Life of PI',
-      genre: 'Adventure',
-      imageUrl: 'https://i.pinimg.com/736x/ae/7a/e4/ae7ae4b85a1039a13d3853ec4e4092f9.jpg',
-    },
-    {
-      id: 1,
-      title: 'The Jungle Book',
-      genre: 'Action',
-      imageUrl: 'https://i.pinimg.com/736x/5b/d9/d6/5bd9d6d6790a47c9b8588ab40c742280.jpg',
-    },
-    {
-      id: 3,
-      title: 'Dune',
-      genre: 'Sci-Fi',
-      imageUrl: 'https://i.pinimg.com/1200x/ab/93/4c/ab934cc1ce1b3cc20b90a557b45517f4.jpg',
-    },
-    {
-      id: 4,
-      title: 'The Matrix',
-      genre: 'Action',
-      imageUrl: 'https://i.pinimg.com/736x/86/c7/aa/86c7aa5e1efd6626999799fc66ef2085.jpg',
-    },
-  ];
+  console.log("Hello from React Native!");
 
   return (
     <>
@@ -50,24 +42,36 @@ export default function Index() {
               <SearchBar />
             </View>
           </View>
-          <Slider />
+          {/* <JellyfinPlayer /> */}
+          <Slider series={heroSeries} />
           <View className="w-full mb-28 mt-2 px-4">
             <View className="most__popular w-full">
               <Categories />
-              <MoviesList title="Top series for you" movies={recommendations} series={true} />
+              <MoviesList
+                title="Top series for you"
+                movies={recommendations}
+                series={true}
+              />
               <View className="pt-8">
                 <MovieCardFull />
               </View>
-              <MoviesList title="Recommended for you" movies={recommendations} />
+              <MoviesList
+                title="Recommended for you"
+                movies={recommendations}
+                series={true}
+              />
               <View className="pt-12">
                 <MovieCardFull />
               </View>
-              <MoviesList title="Top Rated" movies={recommendations} />
+              <MoviesList
+                title="Top Rated"
+                movies={recommendations}
+                series={true}
+              />
             </View>
           </View>
-
-        </ScrollView >
-      </View >
+        </ScrollView>
+      </View>
     </>
   );
 }

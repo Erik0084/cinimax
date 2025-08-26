@@ -20,7 +20,7 @@ const FeaturedMovies = ({title, movies, series}) => {
                             id={item.id}
                             title={item.title}
                             genre={item.genre}
-                            imageUrl={item.imageUrl}
+                            imageUrl={item?.images?.poster}
                             series={series}
                         />
                     ))}

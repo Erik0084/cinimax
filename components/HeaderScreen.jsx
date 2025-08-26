@@ -1,21 +1,22 @@
-import { useRouter } from 'expo-router'
-import { Image, Text, TouchableOpacity, View } from 'react-native'
-import { Icons } from '../constants/icons'
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { Text, TouchableOpacity, View } from "react-native";
 
 const HeaderScreen = ({ title }) => {
-    const router = useRouter()
-    return (
+  const router = useRouter();
+  return (
+    <View className="flex-row items-center justify-between px-6 py-4 pt-12">
+      <TouchableOpacity
+        onPress={() => router.back()}
+        className="w-10 h-10 items-center justify-center"
+      >
+        <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+      </TouchableOpacity>
+      <Text className="text-white text-lg font-semibold flex-1 text-center">
+        {title}
+      </Text>
+    </View>
+  );
+};
 
-        <View className="flex-row items-center justify-center py-4 relative">
-            <TouchableOpacity
-                onPress={router.back}
-                className="absolute left-0 p-2 rounded-xl bg-soft"
-            >
-                <Image source={Icons.arrowBack} className="w-6 h-6" tintColor="#fff" />
-            </TouchableOpacity>
-            <Text className="text-white text-h3 font-semibold">{title}</Text>
-        </View>
-    )
-}
-
-export default HeaderScreen
+export default HeaderScreen;

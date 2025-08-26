@@ -1,15 +1,15 @@
 import { Icons } from "@/constants/icons";
 
 import { useRouter } from "expo-router";
-import React, { forwardRef } from "react";
-import { Image, TextInput, TouchableOpacity, View } from "react-native";
+import { forwardRef } from "react";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 const SearchBar = forwardRef(({}, ref) => {
   const router = useRouter();
   return (
     <TouchableOpacity
       onPress={() => router.push("/search")}
-      className="flex-row items-center bg-soft rounded-full px-[18px] py-2 w-full"
+      className="flex-row items-center bg-soft rounded-full px-[18px] py-4 w-full"
     >
       <Image
         source={Icons.search}
@@ -17,13 +17,15 @@ const SearchBar = forwardRef(({}, ref) => {
         resizeMode="contain"
         tintColor="#fff"
       />
-      <TextInput
-         ref={ref}
-         className="flex-1 text-h6 text-grey"
-         placeholder="Search a movie.."
-         placeholderTextColor="#ccc"
-         underlineColorAndroid="transparent"
-       />
+      {/* <TextInput
+        ref={ref}
+        className="flex-1 text-h6 text-grey"
+        placeholder="Search a movie.."
+        placeholderTextColor="#ccc"
+        underlineColorAndroid="transparent"
+      /> */}
+      <Text className="flex-1 text-h5 text-grey">Search</Text>
+
       <View className="w-px h-6 bg-gray-600 mx-3 opacity-40" />
       <Image
         source={Icons.options}

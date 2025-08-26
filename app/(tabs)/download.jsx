@@ -17,7 +17,7 @@ const DownloadScreen = () => {
       downloading: true
     },
     {
-      id: '1',
+      id: '2`',
       image: 'https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg',
       title: 'Spider-Man No Way Home',
       type: 'Movie',
@@ -27,7 +27,7 @@ const DownloadScreen = () => {
       downloading: true
     },
     {
-      id: '1',
+      id: '3',
       image: 'https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg',
       title: 'Spider-Man No Way Home',
       type: 'Movie',

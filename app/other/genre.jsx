@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { FlatList, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Icons } from '../../constants/icons';
 

@@ -109,3 +109,6 @@ export const Icons = {
     logo,
     PlayButton,
 }
+
+// Lowercase export for consistency
+export const icons = Icons;

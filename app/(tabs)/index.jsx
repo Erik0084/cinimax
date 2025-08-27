@@ -3,13 +3,17 @@ import SearchBar from "@/components/Home/SearchBarHome";
 import MovieCardFull from "@/components/MovieCardFull";
 import MoviesList from "@/components/MoviesList";
 import Slider from "@/components/Slider";
-import { heroSeries } from "@/constants/data/constant";
-import { fetchAllSeries } from "@/utils/useJellyfin";
+import {
+  fetchAllSeries,
+  fetchCollectionItems,
+  fetchCollections,
+} from "@/utils/useJellyfin";
 import React, { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 
 export default function Index() {
   const [jellyfinSeries, setJellyfinSeries] = useState([]);
+  const [newRelease, setNewRelease] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // console.log("jellyfinSeries", jellyfinSeries);
@@ -17,16 +21,43 @@ export default function Index() {
   useEffect(() => {
     const loadSeries = async () => {
       try {
-        const series = await fetchAllSeries();
-        // console.log("series", series);      
-        setJellyfinSeries(series);  
-      } catch (error) {  
-        console.error('Failed to fetch series:', error);  
-      } finally {  
+        const collections = await fetchCollections();
+        // console.log("collection", collections);
+
+        // Find "Trending Now" collection
+        const trendingCollection = collections.find(
+          (collection) => collection.Name === "Trending Now"
+        );
+        // Find "New Release" collection
+        const newReleaseCollection = collections.find(
+          (collection) => collection.Name === "New Release"
+        );
+
+        // console.log("trendingCollection", trendingCollection);
+        // console.log("newReleaseCollection", newReleaseCollection);
+
+        if (trendingCollection || newReleaseCollection) {
+          // Fetch items from "Trending Now" collection
+          const trendingItems = await fetchCollectionItems(
+            trendingCollection.Id
+          );
+          const newReleaseItems = await fetchCollectionItems(
+            newReleaseCollection.Id
+          );
+          setJellyfinSeries(trendingItems);
+          setNewRelease(newReleaseItems);
+        } else {
+          // Fallback to all series if "Trending Now" collection not found
+          const series = await fetchAllSeries();
+          setJellyfinSeries(series);
+        }
+      } catch (error) {
+        console.error("Failed to fetch series:", error);
+      } finally {
         setLoading(false);
-      }  
+      }
     };
-  
+
     loadSeries();
   }, []);
 
@@ -44,12 +75,12 @@ export default function Index() {
             </View>
           </View>
           {/* <JellyfinPlayer /> */}
-          <Slider series={heroSeries} />
+          <Slider series={jellyfinSeries} />
           <View className="w-full mb-28 mt-2 px-4">
             <View className="most__popular w-full">
               <Categories />
               <MoviesList
-                title="Top series for you"
+                title="Treading now"
                 movies={jellyfinSeries}
                 series={true}
               />
@@ -57,8 +88,8 @@ export default function Index() {
                 <MovieCardFull />
               </View>
               <MoviesList
-                title="Recommended for you"
-                movies={jellyfinSeries}
+                title="New Release"
+                movies={newRelease}
                 series={true}
               />
               <View className="pt-12">

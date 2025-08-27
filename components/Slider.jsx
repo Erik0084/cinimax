@@ -1,5 +1,15 @@
+import { JELLYFIN_URL } from "@/utils/useJellyfin";
+import { Link } from "expo-router";
 import React, { useRef, useState } from "react";
-import { Dimensions, Image, ScrollView, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+// const JELLYFIN_URL = process.env.EXPO_PUBLIC_JELLYFIN_URL;
 
 const { width: screenWidth } = Dimensions.get("window");
 const ITEM_WIDTH = screenWidth * 0.9; // 80% of screen width
@@ -41,15 +51,23 @@ const Slider = ({ series }) => {
               aspectRatio: "4/2.3",
             }}
           >
-            <View className="bg-gray-800 relative rounded-[10px] overflow-hidden">
-              <View className="relative">
-                <Image
-                  source={{ uri: movie?.images?.poster }}
-                  className="w-full h-full"
-                  resizeMode="cover"
-                />
-              </View>
-            </View>
+            <Link href={`/series/${movie.Id}`} asChild>
+              <TouchableOpacity>
+                <View className="bg-gray-800 relative rounded-[10px] overflow-hidden">
+                  <View className="relative">
+                    <Image
+                      source={{
+                        uri: movie?.ImageTags?.Primary
+                          ? `${JELLYFIN_URL}/Items/${movie.Id}/Images/Thumb?maxHeight=400&quality=90`
+                          : movie?.images?.poster,
+                      }}
+                      className="w-full h-full"
+                      resizeMode="cover"
+                    />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </Link> 
           </View>
         ))}
       </ScrollView>

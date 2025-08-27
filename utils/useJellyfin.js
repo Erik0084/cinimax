@@ -111,7 +111,7 @@ export const fetchCollectionItems = async (collectionId) => {
     const response = await fetch(
       `${JELLYFIN_URL}/Items?api_key=${API_KEY}&userId=${USER_ID}&ParentId=${collectionId}&IncludeItemTypes=Series`,
       {
-        method: "GET",
+        method: "GET",  
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",

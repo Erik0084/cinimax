@@ -87,8 +87,6 @@ const SeriesDetail = () => {
     );
   }
 
-  console.log("seriesData overview", seriesData);
-
   return (
     <ScrollView className="flex-1 bg-black">
       {/* Background Image and Overlay */}

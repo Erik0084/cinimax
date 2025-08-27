@@ -18,7 +18,16 @@ const SIDE_ITEM_OFFSET = (screenWidth - ITEM_WIDTH) / 2 - ITEM_MARGIN;
 
 const Slider = ({ series }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [loadingStates, setLoadingStates] = useState({});
   const scrollRef = useRef(null);
+
+  const handleImageLoadStart = (index) => {
+    setLoadingStates((prev) => ({ ...prev, [index]: true }));
+  };
+
+  const handleImageLoadEnd = (index) => {
+    setLoadingStates((prev) => ({ ...prev, [index]: false }));
+  };
 
   const handleScroll = (event) => {
     const contentOffset = event.nativeEvent.contentOffset.x;
@@ -55,6 +64,11 @@ const Slider = ({ series }) => {
               <TouchableOpacity>
                 <View className="bg-gray-800 relative rounded-[10px] overflow-hidden">
                   <View className="relative">
+                    {loadingStates[index] && (
+                      <View className="absolute inset-0 bg-gray-700 animate-pulse flex items-center justify-center">
+                        <View className="w-12 h-12 bg-gray-600 rounded-full animate-pulse" />
+                      </View>
+                    )}
                     <Image
                       source={{
                         uri: movie?.ImageTags?.Primary
@@ -63,11 +77,14 @@ const Slider = ({ series }) => {
                       }}
                       className="w-full h-full"
                       resizeMode="cover"
+                      onLoadStart={() => handleImageLoadStart(index)}
+                      onLoadEnd={() => handleImageLoadEnd(index)}
+                      onError={() => handleImageLoadEnd(index)}
                     />
                   </View>
                 </View>
               </TouchableOpacity>
-            </Link> 
+            </Link>
           </View>
         ))}
       </ScrollView>

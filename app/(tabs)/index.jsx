@@ -40,7 +40,7 @@ export default function Index() {
           // Fetch items from "Trending Now" collection
           const trendingItems = await fetchCollectionItems(
             trendingCollection.Id
-          );
+          );  
           const newReleaseItems = await fetchCollectionItems(
             newReleaseCollection.Id
           );

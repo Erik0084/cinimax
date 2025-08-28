@@ -1,10 +1,10 @@
-import Categories from '@/components/Categories';
-import MoviesList from '@/components/MoviesList';
-import SearchBar from '@/components/SearchBar';
+import Categories from '@components/ui/navigation/Categories';
+import MoviesList from '@components/business/media/MoviesList';
+import SearchBar from '@components/ui/navigation/SearchBar';
 import { recommendations } from '@/constants/data/constant';
 import { useEffect, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
-import FeaturedMovieCard from '../../components/FeaturedMovieCard';
+import FeaturedMovieCard from '@components/ui/cards/FeaturedMovieCard';
 
 
 

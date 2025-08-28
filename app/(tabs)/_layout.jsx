@@ -1,7 +1,7 @@
 // app/(tabs)/_layout.jsx
 import { Tabs } from "expo-router";
 import { Image, View } from "react-native";
-import { icons } from "../../constants/icons";
+import { icons } from "@/constants/icons";
 
 export default function TabLayout() {
   return (

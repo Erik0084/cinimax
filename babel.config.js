@@ -7,6 +7,20 @@ module.exports = function (api) {
         ],
         plugins: [
             [
+                "module-resolver",
+                {
+                    root: ["./"],
+                    alias: {
+                        "@": "./",
+                        "@components": "./components",
+                        "@utils": "./utils",
+                        "@constants": "./constants",
+                        "@assets": "./assets",
+                        "@app": "./app"
+                    },
+                },
+            ],
+            [
                 "module:react-native-dotenv",
                 {
                     moduleName: "@env",

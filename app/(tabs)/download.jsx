@@ -1,8 +1,8 @@
 import React from 'react';
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
-import DownloadCard from '../../components/DownloadCard';
-import HeaderScreen from '../../components/HeaderScreen';
-import { Icons } from '../../constants/icons';
+import DownloadCard from '@components/ui/cards/DownloadCard';
+import HeaderScreen from '@components/layout/HeaderScreen';
+import { Icons } from '@/constants/icons';
 
 const DownloadScreen = () => {
   const [downloads, setDownloads] = React.useState([

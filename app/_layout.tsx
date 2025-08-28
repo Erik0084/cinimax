@@ -1,6 +1,6 @@
+import AnimatedSplashScreen from '@components/layout/AnimatedSplashScreen';
 import { Stack } from "expo-router";
 import { useState } from 'react';
-import AnimatedSplashScreen from '../components/AnimatedSplashScreen';
 import "./globals.css";
 
 export default function RootLayout() {
@@ -21,12 +21,13 @@ export default function RootLayout() {
       {/* <StatusBar hidden={true} /> */}
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="movies/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="user" options={{ headerShown: false }} />
-        <Stack.Screen name="profiles/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="series/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="other/upcoming-series" options={{ headerShown: false }} />
-
+        <Stack.Screen name="media/movies/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="auth/user" options={{ headerShown: false }} />
+        <Stack.Screen name="media/profiles/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="media/series/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="features/other/upcoming-series" options={{ headerShown: false }} />
+        <Stack.Screen name="features/other/genre" options={{ headerShown: false }} />
+        <Stack.Screen name="features/other/whislist" options={{ headerShown: false }} />
       </Stack>
     </>
   );

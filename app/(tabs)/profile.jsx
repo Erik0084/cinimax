@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { Icons } from '../../constants/icons';
+import { Icons } from '@/constants/icons';
 
 // Helper component for a single setting item
 const SettingItem = ({ icon, text, onPress }) => (

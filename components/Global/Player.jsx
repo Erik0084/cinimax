@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ResizeMode, Video } from "expo-av";
+import Slider from "@react-native-community/slider";
+import { Video } from "expo-av";
+import { router } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -12,40 +14,323 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { API_KEY, JELLYFIN_URL, USER_ID } from "../../utils/useJellyfin";
 
+// Custom Landscape Video Player Component
+const CustomLandscapePlayer = ({
+  videoUrl,
+  mediaInfo,
+  onClose,
+  jellyfinConfig,
+}) => {
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const videoRef = useRef(null);
+  const controlsTimeoutRef = useRef(null);
+
+  // Auto-hide controls after 3 seconds
+  const resetControlsTimeout = () => {
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    setShowControls(true);
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+  };
+
+  // Show controls on touch
+  const handleScreenTouch = () => {
+    resetControlsTimeout();
+  };
+
+  // Report progress to Jellyfin
+  const reportProgress = async (positionTicks, eventType = "timeupdate") => {
+    try {
+      const { serverUrl, itemId, apiKey, userId } = jellyfinConfig;
+      const endpoint =
+        eventType === "start"
+          ? "Playing"
+          : eventType === "stop"
+          ? "Stopped"
+          : "Progress";
+
+      await fetch(
+        `${serverUrl}/Sessions/Playing/${endpoint}?api_key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `MediaBrowser Token="${apiKey}"`,
+          },
+          body: JSON.stringify({
+            ItemId: itemId,
+            UserId: userId,
+            PositionTicks: positionTicks,
+            IsPaused: !isPlaying,
+            MediaSourceId: itemId,
+            PlayMethod: "DirectStream",
+          }),
+        }
+      );
+    } catch (error) {
+      console.log("Failed to report progress:", error);
+    }
+  };
+
+  const handlePlayPause = async () => {
+    try {
+      if (isPlaying) {
+        await videoRef.current?.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        await videoRef.current?.playAsync();
+        setIsPlaying(true);
+      }
+      resetControlsTimeout();
+    } catch (error) {
+      console.log("Error toggling play/pause:", error);
+    }
+  };
+
+  const handleSeek = async (value) => {
+    try {
+      await videoRef.current?.setPositionAsync(value);
+      setCurrentTime(value);
+      reportProgress(Math.floor(value * 10000));
+      resetControlsTimeout();
+    } catch (error) {
+      console.log("Error seeking:", error);
+    }
+  };
+
+  const handleClose = async () => {
+    try {
+      // Report stop to Jellyfin
+      if (currentTime > 0) {
+        const positionTicks = Math.floor(currentTime * 10000);
+        await reportProgress(positionTicks, "stop");
+      }
+
+      // Stop video playback
+      await videoRef.current?.pauseAsync();
+      await videoRef.current?.unloadAsync();
+
+      onClose();
+    } catch (error) {
+      console.log("Error closing player:", error);
+      onClose();
+    }
+  };
+
+  const formatTime = (milliseconds) => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
+    }
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const handlePlaybackStatusUpdate = (status) => {
+    if (status.isLoaded) {
+      setCurrentTime(status.positionMillis || 0);
+      setDuration(status.durationMillis || 0);
+      setIsPlaying(status.isPlaying || false);
+      setLoading(false);
+
+      // Report progress to Jellyfin
+      if (status.positionMillis) {
+        const positionTicks = Math.floor(status.positionMillis * 10000);
+        reportProgress(positionTicks);
+      }
+    }
+  };
+
+  // Initialize controls timeout
+  useEffect(() => {
+    resetControlsTimeout();
+    return () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const screenData = Dimensions.get("window");
+
+  return (
+    <TouchableOpacity
+      style={styles.customPlayerContainer}
+      activeOpacity={1}
+      onPress={handleScreenTouch}
+    >
+      <Video
+        ref={videoRef}
+        style={{
+          width: screenData.width,
+          height: screenData.height,
+        }}
+        source={{
+          uri: videoUrl,
+          headers: {
+            "User-Agent": "JellyfinApp/1.0.0",
+            Authorization: `MediaBrowser Token="${jellyfinConfig.apiKey}"`,
+          },
+        }}
+        useNativeControls={false}
+        resizeMode="contain"
+        isLooping={false}
+        shouldPlay={true}
+        onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+        onLoad={(data) => {
+          console.log("Video loaded successfully");
+          reportProgress(0, "start");
+          setLoading(false);
+        }}
+        onError={(error) => {
+          console.error("Video error:", error);
+          setLoading(false);
+        }}
+      />
+
+      {/* Loading Overlay */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#ff6b6b" />
+          <Text style={styles.loadingText}>Loading video...</Text>
+          {mediaInfo && <Text style={styles.mediaTitle}>{mediaInfo.Name}</Text>}
+        </View>
+      )}
+
+      {/* Custom Controls Overlay */}
+      {showControls && !loading && (
+        <View style={styles.controlsOverlay}>
+          {/* Top Controls */}
+          <View style={styles.topControls}>
+            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+              <Ionicons name="close" size={28} color="white" />
+            </TouchableOpacity>
+
+            {mediaInfo && (
+              <View style={styles.mediaInfoTop}>
+                <Text style={styles.mediaTitle} numberOfLines={1}>
+                  {mediaInfo.Name}
+                </Text>
+                {mediaInfo.ProductionYear && (
+                  <Text style={styles.mediaYear}>
+                    {mediaInfo.ProductionYear}
+                  </Text>
+                )}
+              </View>
+            )}
+
+            <View style={styles.topRightControls}>
+              <TouchableOpacity style={styles.settingsButton}>
+                <Ionicons name="settings-outline" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Center Controls */}
+          <View style={styles.centerControls}>
+            <TouchableOpacity
+              style={styles.seekButton}
+              onPress={() => handleSeek(Math.max(0, currentTime - 10000))}
+            >
+              <Ionicons name="play-back" size={32} color="white" />
+              <Text style={styles.seekText}>10</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.playPauseButton}
+              onPress={handlePlayPause}
+            >
+              <Ionicons
+                name={isPlaying ? "pause" : "play"}
+                size={56}
+                color="white"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.seekButton}
+              onPress={() =>
+                handleSeek(Math.min(duration, currentTime + 10000))
+              }
+            >
+              <Ionicons name="play-forward" size={32} color="white" />
+              <Text style={styles.seekText}>10</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Bottom Controls */}
+          <View style={styles.bottomControls}>
+            <View style={styles.progressContainer}>
+              <Text style={styles.timeText}>
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </Text>
+
+              <Slider
+                style={styles.progressSlider}
+                minimumValue={0}
+                maximumValue={duration || 1}
+                value={currentTime}
+                onSlidingComplete={handleSeek}
+                minimumTrackTintColor="#ff6b6b"
+                maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
+                thumbStyle={styles.sliderThumb}
+              />
+            </View>
+          </View>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+};
+
+// Main Player Component
 const Player = ({ id }) => {
   const [videoUrl, setVideoUrl] = useState(null);
-  const [status, setStatus] = useState({});
   const [loading, setLoading] = useState(true);
   const [mediaInfo, setMediaInfo] = useState(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [orientation, setOrientation] = useState("portrait");
   const [screenData, setScreenData] = useState(Dimensions.get("window"));
-  const video = useRef(null);
 
   // Jellyfin configuration
   const JELLYFIN_CONFIG = {
-    serverUrl: "http://192.168.1.13:8096",
+    serverUrl: JELLYFIN_URL,
     itemId: id,
-    apiKey: "4a8f78d0e0eb4b7f8957732ee343a3b0",
-    userId: "ee199cb3177a4b4fa1ffe22d10f9857e",
+    apiKey: API_KEY,
+    userId: USER_ID,
   };
 
-  // Handle orientation changes
+  // Set landscape orientation on component mount
   useEffect(() => {
-    const subscription = Dimensions.addEventListener("change", ({ window }) => {
-      setScreenData(window);
-      const isLandscape = window.width > window.height;
-      setOrientation(isLandscape ? "landscape" : "portrait");
-    });
+    const setLandscapeOrientation = async () => {
+      try {
+        await ScreenOrientation.lockAsync(
+          ScreenOrientation.OrientationLock.LANDSCAPE
+        );
+        StatusBar.setHidden(true);
+      } catch (error) {
+        console.log("Error setting landscape orientation:", error);
+      }
+    };
 
-    return () => subscription?.remove();
+    setLandscapeOrientation();
   }, []);
 
   // Reset screen orientation when component unmounts
   useEffect(() => {
     return () => {
-      // Reset to portrait orientation when exiting player
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
         .then(() => {
           StatusBar.setHidden(false);
@@ -54,7 +339,16 @@ const Player = ({ id }) => {
           console.log("Error resetting orientation:", error);
         });
     };
-  }, []);  
+  }, []);
+
+  // Handle orientation changes
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
+      setScreenData(window);
+    });
+
+    return () => subscription?.remove();
+  }, []);
 
   // Enhanced Jellyfin stream fetching
   useEffect(() => {
@@ -163,104 +457,24 @@ const Player = ({ id }) => {
     fetchJellyfinStream();
   }, [id]);
 
-  // Report playback progress to Jellyfin
-  const reportProgress = async (positionTicks, eventType = "timeupdate") => {
+  const handleClose = async () => {
     try {
-      const { serverUrl, itemId, apiKey, userId } = JELLYFIN_CONFIG;
-      const endpoint =
-        eventType === "start"
-          ? "Playing"
-          : eventType === "stop"
-          ? "Stopped"
-          : "Progress";
-
-      await fetch(
-        `${serverUrl}/Sessions/Playing/${endpoint}?api_key=${apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `MediaBrowser Token="${apiKey}"`,
-          },
-          body: JSON.stringify({
-            ItemId: itemId,
-            UserId: userId,
-            PositionTicks: positionTicks,
-            IsPaused: !status.isPlaying,
-            MediaSourceId: itemId,
-            PlayMethod: "DirectStream",
-          }),
-        }
+      // Reset orientation before navigating back
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP
       );
+      StatusBar.setHidden(false);
+      router.back();
     } catch (error) {
-      console.log("Failed to report progress:", error);
+      console.log("Error closing player:", error);
+      router.back();
     }
-  };
-
-  // Toggle fullscreen
-  const toggleFullscreen = async () => {
-    try {
-      if (isFullscreen) {
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT_UP
-        );
-        StatusBar.setHidden(false);
-        setIsFullscreen(false);
-      } else {
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.LANDSCAPE
-        );
-        StatusBar.setHidden(true);
-        setIsFullscreen(true);
-      }
-    } catch (error) {
-      console.log("Error toggling fullscreen:", error);
-    }
-  };
-
-  const handlePlaybackStatusUpdate = (playbackStatus) => {
-    setStatus(playbackStatus);
-
-    if (playbackStatus.isLoaded && playbackStatus.positionMillis) {
-      const positionTicks = Math.floor(playbackStatus.positionMillis * 10000);
-      reportProgress(positionTicks);
-    }
-  };
-
-  const getVideoStyle = () => {
-    const { width: screenWidth, height: screenHeight } = screenData;
-
-    if (isFullscreen || orientation === "landscape") {
-      return {
-        width: screenWidth,
-        height: screenHeight,
-      };
-    } else {
-      return {
-        width: screenWidth,
-        height: screenHeight * 0.6,
-      };
-    }
-  };
-
-  const formatTime = (milliseconds) => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
-        .toString()
-        .padStart(2, "0")}`;
-    }
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color="#ff6b6b" />
         <Text style={styles.loadingText}>Loading video...</Text>
         {mediaInfo && <Text style={styles.mediaTitle}>{mediaInfo.Name}</Text>}
       </View>
@@ -268,117 +482,14 @@ const Player = ({ id }) => {
   }
 
   return (
-    <View
-      style={[styles.container, isFullscreen && styles.fullscreenContainer]}
-    >
+    <View style={styles.container}>
       {videoUrl ? (
-        <View style={styles.videoContainer}>
-          <Video
-            ref={video}
-            style={[styles.video, getVideoStyle()]}
-            source={{
-              uri: videoUrl,
-              headers: {
-                "User-Agent": "JellyfinApp/1.0.0",
-                Authorization: `MediaBrowser Token="${JELLYFIN_CONFIG.apiKey}"`,
-              },
-            }}
-            useNativeControls={!isFullscreen}
-            resizeMode={ResizeMode.CONTAIN}
-            isLooping={false}
-            onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-            shouldPlay={true}
-            onError={(error) => {
-              console.error("Video error details:", error);
-              Alert.alert(
-                "Playback Error",
-                `Failed to play video. Error: ${error.error || "Unknown error"}`
-              );
-            }}
-            onLoad={(data) => {
-              console.log("Video loaded successfully");
-              reportProgress(0, "start");
-            }}
-            onLoadStart={() => {
-              console.log("Video load started");
-            }}
-          />
-
-          {/* Custom Controls Overlay for Fullscreen/Landscape */}
-          {(isFullscreen || orientation === 'landscape') && (
-            <View style={styles.controlsOverlay}>
-              <View style={styles.topControls}>
-                <TouchableOpacity 
-                  style={styles.fullscreenButton}
-                  onPress={toggleFullscreen}
-                >
-                  <Ionicons name="contract-outline" size={24} color="white" />
-                </TouchableOpacity>
-              </View>
-              
-              <View style={styles.centerControls}>
-                <TouchableOpacity 
-                  style={styles.playPauseButton}
-                  onPress={() => {
-                    if (status.isPlaying) {
-                      video.current?.pauseAsync();
-                    } else {
-                      video.current?.playAsync();
-                    }
-                  }}
-                >
-                  <Ionicons 
-                    name={status.isPlaying ? "pause" : "play"} 
-                    size={48} 
-                    color="white" 
-                  />
-                </TouchableOpacity>
-              </View>
-              
-              {status.isLoaded && (
-                <View style={styles.bottomControls}>
-                  <View style={styles.progressContainer}>
-                    <Text style={styles.timeText}>
-                      {formatTime(status.positionMillis || 0)} / {formatTime(status.durationMillis || 0)}
-                    </Text>
-                    <View style={styles.progressBar}>
-                      <View 
-                        style={[
-                          styles.progressFill,
-                          {
-                            width: `${((status.positionMillis || 0) / (status.durationMillis || 1)) * 100}%`
-                          }
-                        ]} 
-                      />
-                    </View>
-                  </View>
-                </View>
-              )}
-            </View>
-          )}
-
-          {/* Fullscreen Toggle for Portrait Mode */}
-          {!isFullscreen && (
-            <TouchableOpacity
-              style={styles.fullscreenButton}
-              onPress={toggleFullscreen}
-            >
-              <Ionicons name="expand-outline" size={24} color="white" />
-            </TouchableOpacity>
-          )}
-
-          {/* Media Info */}
-          {mediaInfo && !isFullscreen && (
-            <View style={styles.mediaInfoContainer}>
-              <Text style={styles.mediaTitle}>{mediaInfo.Name}</Text>
-              {mediaInfo.Overview && (
-                <Text style={styles.mediaOverview} numberOfLines={2}>
-                  {mediaInfo.Overview}
-                </Text>
-              )}
-            </View>
-          )}
-        </View>
+        <CustomLandscapePlayer
+          videoUrl={videoUrl}
+          mediaInfo={mediaInfo}
+          onClose={handleClose}
+          jellyfinConfig={JELLYFIN_CONFIG}
+        />
       ) : (
         <View style={styles.loadingContainer}>
           <Text style={styles.errorText}>Failed to load video</Text>
@@ -393,28 +504,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   },
-  fullscreenContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 1000,
-  },
-  videoContainer: {
+  customPlayerContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-  },
-  video: {
     backgroundColor: "#000",
+    position: "relative",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#000",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    zIndex: 2000,
   },
   loadingText: {
     color: "#fff",
@@ -427,87 +537,103 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 20,
   },
-  mediaInfoContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    padding: 15,
-    borderRadius: 8,
-  },
-  mediaTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  mediaOverview: {
-    color: "#ccc",
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  fullscreenButton: {
-    position: "absolute",
-    top: 20,
-    right: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    padding: 10,
-    borderRadius: 20,
-    zIndex: 1001,
-  },
   controlsOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     zIndex: 1000,
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
   topControls: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 20,
+    paddingTop: 30,
+  },
+  closeButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    padding: 12,
+    borderRadius: 25,
+  },
+  mediaInfoTop: {
+    flex: 1,
+    marginHorizontal: 20,
+  },
+  mediaTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  mediaYear: {
+    color: "#ccc",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 2,
+  },
+  topRightControls: {
+    flexDirection: "row",
+  },
+  settingsButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    padding: 12,
+    borderRadius: 25,
   },
   centerControls: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 40,
   },
-  bottomControls: {
-    padding: 20,
+  seekButton: {
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    padding: 15,
+    borderRadius: 35,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  seekText: {
+    color: "white",
+    fontSize: 10,
+    position: "absolute",
+    bottom: 2,
+    fontWeight: "bold",
   },
   playPauseButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     padding: 20,
     borderRadius: 50,
   },
-  progressBar: {
-    height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderRadius: 2,
-    marginTop: 10,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#ff6b6b',
-    borderRadius: 2,
+  bottomControls: {
+    padding: 20,
+    paddingBottom: 30,
   },
   progressContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    padding: 15,
+    borderRadius: 10,
   },
   timeText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 16,
     textAlign: "center",
+    marginBottom: 10,
+    fontWeight: "500",
+  },
+  progressSlider: {
+    width: "100%",
+    height: 40,
+  },
+  sliderThumb: {
+    backgroundColor: "#ff6b6b",
+    width: 18,
+    height: 18,
   },
 });
 

@@ -1,8 +1,10 @@
 // utils/useJellyfin.js
 
-export let JELLYFIN_URL = "http://192.168.1.13:8096";
-export let API_KEY = "4a8f78d0e0eb4b7f8957732ee343a3b0";
-export let USER_ID = "ee199cb3177a4b4fa1ffe22d10f9857e";
+export let JELLYFIN_URL = "http://192.168.240.202:8096";
+export let API_KEY =
+  process.env.JELLYFIN_API_KEY || "4a8f78d0e0eb4b7f8957732ee343a3b0";
+export let USER_ID =
+  process.env.JELLYFIN_USER_ID || "ee199cb3177a4b4fa1ffe22d10f9857e";
 
 // fetch all series
 export const fetchAllSeries = async () => {
@@ -111,7 +113,7 @@ export const fetchCollectionItems = async (collectionId) => {
     const response = await fetch(
       `${JELLYFIN_URL}/Items?api_key=${API_KEY}&userId=${USER_ID}&ParentId=${collectionId}&IncludeItemTypes=Series`,
       {
-        method: "GET",  
+        method: "GET",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -161,6 +163,31 @@ export const fetchAllEpisodesFromCollection = async (collectionId) => {
     return allEpisodes;
   } catch (error) {
     console.error("Error fetching episodes from collection:", error);
+    return [];
+  }
+};
+
+export const fetchRecentSeries = async () => {
+  try {
+    // const JELLYFIN_URL = "https://your-ngrok-url.ngrok.io";
+    // const API_KEY = "your-api-key";
+    // const USER_ID = "your-user-id";
+
+    const response = await fetch(
+      `${JELLYFIN_URL}/Items?api_key=${API_KEY}&userId=${USER_ID}&IncludeItemTypes=Series&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,ProductionYear,Status,EndDate&SortBy=DateCreated&SortOrder=Descending`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await response.json();
+    return data.Items || [];
+  } catch (error) {
+    console.error("Error fetching recent series:", error);
     return [];
   }
 };

@@ -17,11 +17,12 @@ import { Icons } from "../../constants/icons";
 import { fetchAllSeries, JELLYFIN_URL } from "../../utils/useJellyfin";
 
 const SeriesDetail = () => {
-  const { id } = useLocalSearchParams();  // series id
+  const { id } = useLocalSearchParams(); // series id
   const [isPlaying, setIsPlaying] = useState(false);
   const [seriesData, setSeriesData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentEpisodeId, setCurrentEpisodeId] = useState(null);
+  const [closePlayer, setClosePlayer] = useState(false);
 
   // Fetch series data
   useEffect(() => {
@@ -73,21 +74,33 @@ const SeriesDetail = () => {
   const handleClosePlayer = () => {
     setIsPlaying(false);
     setCurrentEpisodeId(null);
+    setClosePlayer(false); // Reset closePlayer state
     // Ensure we return to portrait after closing player
     ScreenOrientation.lockAsync(
       ScreenOrientation.OrientationLock.PORTRAIT_UP
     ).catch(console.warn);
   };
 
-  if (isPlaying) {
+  // Handle closePlayer state change
+  useEffect(() => {
+    if (closePlayer) {
+      handleClosePlayer();
+    }
+  }, [closePlayer]);
+
+  if (isPlaying && !closePlayer) {
     return (
       <View className="flex-1 bg-black">
-        <Player id={currentEpisodeId || id} onClose={handleClosePlayer} />
+        <Player
+          setClosePlayer={setClosePlayer}
+          id={currentEpisodeId || id}
+          onClose={handleClosePlayer}
+        />
       </View>
     );
   }
 
-  return (
+  return ( 
     <ScrollView className="flex-1 bg-black">
       {/* Background Image and Overlay */}
       <View className="relative w-full h-[74vh]">

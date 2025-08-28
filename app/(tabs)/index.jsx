@@ -7,6 +7,7 @@ import {
   fetchAllSeries,
   fetchCollectionItems,
   fetchCollections,
+  fetchRecentSeries,
 } from "@/utils/useJellyfin";
 import React, { useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
@@ -14,6 +15,7 @@ import { ScrollView, View } from "react-native";
 export default function Index() {
   const [jellyfinSeries, setJellyfinSeries] = useState([]);
   const [newRelease, setNewRelease] = useState([]);
+  const [recentSeries, setRecentSeries] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // console.log("jellyfinSeries", jellyfinSeries);
@@ -22,6 +24,8 @@ export default function Index() {
     const loadSeries = async () => {
       try {
         const collections = await fetchCollections();
+        const recentSeriesData = await fetchRecentSeries();
+        setRecentSeries(recentSeriesData);
         // console.log("collection", collections);
 
         // Find "Trending Now" collection
@@ -40,7 +44,7 @@ export default function Index() {
           // Fetch items from "Trending Now" collection
           const trendingItems = await fetchCollectionItems(
             trendingCollection.Id
-          );  
+          );
           const newReleaseItems = await fetchCollectionItems(
             newReleaseCollection.Id
           );
@@ -82,6 +86,11 @@ export default function Index() {
               <MoviesList
                 title="Treading now"
                 movies={jellyfinSeries}
+                series={true}
+              />
+              <MoviesList
+                title="Recently Added Series"
+                movies={recentSeries}
                 series={true}
               />
               <View className="pt-8">

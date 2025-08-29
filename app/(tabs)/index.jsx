@@ -1,8 +1,8 @@
-import Categories from "@components/ui/navigation/Categories";
-import SearchBar from "@components/ui/navigation/SearchBarHome";
-import MovieCardFull from "@components/ui/cards/MovieCardFull";
 import MoviesList from "@components/business/media/MoviesList";
 import Slider from "@components/business/media/Slider";
+import MovieCardFull from "@components/ui/cards/MovieCardFull";
+import Categories from "@components/ui/navigation/Categories";
+import SearchBar from "@components/ui/navigation/SearchBarHome";
 import {
   fetchAllSeries,
   fetchCollectionItems,

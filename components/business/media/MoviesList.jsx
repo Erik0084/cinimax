@@ -4,7 +4,6 @@ import { ScrollView, Text, View } from "react-native";
 import MovieCard from "../../ui/cards/MovieCard";
 
 const FeaturedMovies = ({ title, movies, series }) => {
-  // console.log("movies", movies);
   return (
     <View>
       <View className="mt-8">
@@ -12,7 +11,7 @@ const FeaturedMovies = ({ title, movies, series }) => {
           <Text className="text-h4 text-white font-bold">{title}</Text>
           <Link href="/popular">
             <Text className=" text-h6 text-blue_accent">See All</Text>
-          </Link>  
+          </Link>
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -20,12 +19,11 @@ const FeaturedMovies = ({ title, movies, series }) => {
             const imageUrl = item.ImageTags?.Primary
               ? `${JELLYFIN_URL}/Items/${item.Id}/Images/Primary?tag=${item.ImageTags.Primary}`
               : `${JELLYFIN_URL}/Items/${item.Id}/Images/Primary`;
-            // console.log('Image URL for', item.Name, ':', imageUrl);
             return (
               <MovieCard
                 key={item.Id}
                 id={item.Id}
-                title={item.Name}  
+                title={item.Name}
                 genre={
                   item.GenreItems && item.GenreItems.length > 0
                     ? item.GenreItems[0].Name

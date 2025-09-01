@@ -50,6 +50,7 @@ import share41 from '@/assets/icons/share (4) 1.png'
 import shield21 from '@/assets/icons/shield (2) 1.png'
 import star from '@/assets/icons/star.png'
 import tick1 from '@/assets/icons/tick 1.png'
+import tick from '@/assets/icons/tick.png'
 import trashBin1 from '@/assets/icons/trash-bin 1.png'
 import workspacePremiumBlack24dp1 from '@/assets/icons/workspace_premium_black_24dp 1.png'
 
@@ -103,6 +104,7 @@ export const Icons = {
     share41,
     shield21,
     star,
+    tick,
     tick1,
     trashBin1,
     workspacePremiumBlack24dp1,

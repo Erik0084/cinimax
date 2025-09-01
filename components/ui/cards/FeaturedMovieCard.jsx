@@ -1,6 +1,7 @@
 import { Icons } from "@/constants/icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image, Text, View } from "react-native";
+import { JELLYFIN_URL } from "../../../utils/api/useJellyfin";
 
 const FeaturedMovieCard = ({ featuredMovies }) => {
   return (
@@ -9,7 +10,9 @@ const FeaturedMovieCard = ({ featuredMovies }) => {
       <View className="relative rounded-xl overflow-hidden">
         <Image
           source={{
-            uri: "https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
+            uri:
+              `${JELLYFIN_URL}/Items/${featuredMovies.Id}/Images/Primary?format=jpg&quality=80` ||
+              "https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
           }}
           className="w-32 h-auto rounded-xl"
           resizeMode="cover"

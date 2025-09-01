@@ -50,43 +50,49 @@ const Slider = ({ series }) => {
           paddingHorizontal: SIDE_ITEM_OFFSET,
         }}
       >
-        {series.map((movie, index) => (
-          <View
-            key={index}
-            style={{
-              width: ITEM_WIDTH,
-              marginHorizontal: ITEM_MARGIN,
-              height: "auto",
-              aspectRatio: "4/2.3",
-            }}
-          >
-            <Link href={`/media/series/${movie.Id}`} asChild>
-              <TouchableOpacity>
-                <View className="bg-gray-800 relative rounded-[10px] overflow-hidden">
-                  <View className="relative">
-                    {loadingStates[index] && (
-                      <View className="absolute inset-0 bg-gray-700 animate-pulse flex items-center justify-center">
-                        <View className="w-12 h-12 bg-gray-600 rounded-full animate-pulse" />
+        {series ? (
+          <>
+            {series.map((movie, index) => (
+              <View
+                key={index}
+                style={{
+                  width: ITEM_WIDTH,
+                  marginHorizontal: ITEM_MARGIN,
+                  height: "auto",
+                  aspectRatio: "4/2.3",
+                }}
+              >
+                <Link href={`/media/series/${movie.Id}`} asChild>
+                  <TouchableOpacity>
+                    <View className="bg-gray-800 relative rounded-[10px] overflow-hidden">
+                      <View className="relative">
+                        {loadingStates[index] && (
+                          <View className="absolute inset-0 bg-gray-700 animate-pulse flex items-center justify-center">
+                            <View className="w-12 h-12 bg-gray-600 rounded-full animate-pulse" />
+                          </View>
+                        )}
+                        <Image
+                          source={{
+                            uri: movie?.ImageTags?.Primary
+                              ? `${JELLYFIN_URL}/Items/${movie.Id}/Images/Thumb?maxHeight=400&quality=90`
+                              : movie?.images?.poster,
+                          }}
+                          className="w-full h-full"
+                          resizeMode="cover"
+                          onLoadStart={() => handleImageLoadStart(index)}
+                          onLoadEnd={() => handleImageLoadEnd(index)}
+                          onError={() => handleImageLoadEnd(index)}
+                        />
                       </View>
-                    )}
-                    <Image
-                      source={{
-                        uri: movie?.ImageTags?.Primary
-                          ? `${JELLYFIN_URL}/Items/${movie.Id}/Images/Thumb?maxHeight=400&quality=90`
-                          : movie?.images?.poster,
-                      }}
-                      className="w-full h-full"
-                      resizeMode="cover"
-                      onLoadStart={() => handleImageLoadStart(index)}
-                      onLoadEnd={() => handleImageLoadEnd(index)}
-                      onError={() => handleImageLoadEnd(index)}
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        ))}
+                    </View>
+                  </TouchableOpacity>
+                </Link>
+              </View>
+            ))}
+          </>
+        ) : (
+          <Text>Loading...</Text>
+        )}
       </ScrollView>
 
       {/* Pagination indicators */}

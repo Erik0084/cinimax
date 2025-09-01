@@ -1,4 +1,5 @@
 import AnimatedSplashScreen from '@components/layout/AnimatedSplashScreen';
+import { DownloadProvider } from '@/contexts/DownloadContext';
 import { Stack } from "expo-router";
 import { useState } from 'react';
 import "./globals.css";
@@ -17,7 +18,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <DownloadProvider>
       {/* <StatusBar hidden={true} /> */}
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -29,6 +30,6 @@ export default function RootLayout() {
         <Stack.Screen name="features/other/genre" options={{ headerShown: false }} />
         <Stack.Screen name="features/other/whislist" options={{ headerShown: false }} />
       </Stack>
-    </>
+    </DownloadProvider>
   );
 }

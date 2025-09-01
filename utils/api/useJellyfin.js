@@ -1,8 +1,10 @@
 // utils/useJellyfin.js
 
-export const JELLYFIN_URL = "http://192.168.1.8:8096";
-export const API_KEY = process.env.JELLYFIN_API_KEY || "4a8f78d0e0eb4b7f8957732ee343a3b0";
-export const USER_ID = process.env.JELLYFIN_USER_ID || "ee199cb3177a4b4fa1ffe22d10f9857e";
+export const JELLYFIN_URL = "http://192.168.1.15:8096";
+export const API_KEY =
+  process.env.JELLYFIN_API_KEY || "4a8f78d0e0eb4b7f8957732ee343a3b0";
+export const USER_ID =
+  process.env.JELLYFIN_USER_ID || "ee199cb3177a4b4fa1ffe22d10f9857e";
 
 // fetch all series
 export const fetchAllSeries = async () => {

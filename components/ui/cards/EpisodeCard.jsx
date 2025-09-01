@@ -1,14 +1,28 @@
+// Components/EpisodeCard.jsx
 import { Icons } from "@/constants/icons";
+import { useDownloads } from "@/contexts/DownloadContext";
 import {
+  API_KEY,
   fetchEpisodes,
   fetchSeasons,
-  JELLYFIN_URL
+  JELLYFIN_URL,
 } from "@/utils/api/useJellyfin";
 import { useEffect, useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import SeasonSelectionModal from "../modals/SeasonSelectionModal";
 
 const EpisodeCard = ({ episode, seriesId, onPlay }) => {
+  const { startDownload, downloads, DOWNLOAD_STATES } = useDownloads();
+  const [isDownloading, setIsDownloading] = useState(false);
+  
+  // Check if this episode is already being downloaded or completed
+  const existingDownload = downloads.find(d => d.itemId === episode.Id);
+  const isAlreadyDownloading = existingDownload && 
+    (existingDownload.status === DOWNLOAD_STATES.DOWNLOADING || 
+     existingDownload.status === DOWNLOAD_STATES.PENDING);
+  const isCompleted = existingDownload && existingDownload.status === DOWNLOAD_STATES.COMPLETED;
+  const downloadProgress = existingDownload ? (existingDownload.progress * 100) : 0;
+
   const formatDuration = (ticks) => {
     if (!ticks) return "N/A";
     const minutes = Math.round(ticks / 600000000);
@@ -23,6 +37,43 @@ const EpisodeCard = ({ episode, seriesId, onPlay }) => {
     }
     return "https://i.pinimg.com/736x/b0/41/bc/b041bc4d2e2e3c425cae4eb5c3f27a10.jpg";
   };
+
+  const handleDownload = async () => {
+    // If already completed, show success message without popup
+    if (isCompleted) {
+      return;
+    }
+    
+    // Only show popup if already downloading/pending
+    if (isDownloading || isAlreadyDownloading) {
+      return;
+    }
+
+    try {
+      setIsDownloading(true);
+
+      // Use the correct Jellyfin configuration from useJellyfin.js
+      const JELLYFIN_CONFIG = {
+        serverUrl: JELLYFIN_URL,
+        apiKey: API_KEY,
+      };
+
+      // Start download using the DownloadContext
+      await startDownload(episode, JELLYFIN_CONFIG);
+      
+      console.log("Download started for episode:", episode.Name);
+    } catch (error) {
+      console.error("Download failed:", error);
+      // Only show error popup for actual failures
+      Alert.alert(
+        "Download Failed",
+        "Failed to start download. Please try again."
+      );
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <View className="bg-soft rounded-xl p-3 mb-4">
       <View className="flex-row items-center mb-3">
@@ -43,7 +94,7 @@ const EpisodeCard = ({ episode, seriesId, onPlay }) => {
             />
           </TouchableOpacity>
         </View>
-        <View className="flex-1 flex-row  items-center py-2">
+        <View className="flex-1 flex-row items-center py-2">
           <View className="flex-1">
             <Text className="text-grey text-h6">
               {formatDuration(episode?.RunTimeTicks)}
@@ -52,12 +103,31 @@ const EpisodeCard = ({ episode, seriesId, onPlay }) => {
               {episode?.Name || `Episode ${episode?.IndexNumber || "N/A"}`}
             </Text>
           </View>
-          <TouchableOpacity className="p-2 rounded-full bg-black">
-            <Image
-              source={Icons.download}
-              className="w-6 h-6"
-              tintColor="#FF8700"
-            />
+          <TouchableOpacity
+            className="p-2 rounded-full bg-black"
+            onPress={handleDownload}
+            disabled={isDownloading || isAlreadyDownloading}
+          >
+            {isCompleted ? (
+               <Image
+                 source={Icons.tick}
+                 className="w-6 h-6"  
+                 tintColor="#00FF00"
+               />
+            ) : (
+              <Image
+                source={Icons.download}
+                className="w-6 h-6"
+                tintColor={(isDownloading || isAlreadyDownloading) ? "#666" : "#FF8700"}
+              />
+            )}
+            {(isDownloading || isAlreadyDownloading) && !isCompleted && (
+              <View className="absolute inset-0 items-center justify-center">
+                <Text className="text-white text-xs">
+                  {Math.round(downloadProgress)}%
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>

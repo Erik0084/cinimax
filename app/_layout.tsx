@@ -1,5 +1,5 @@
-import AnimatedSplashScreen from '@components/layout/AnimatedSplashScreen';
 import { DownloadProvider } from '@/contexts/DownloadContext';
+import AnimatedSplashScreen from '@components/layout/AnimatedSplashScreen';
 import { Stack } from "expo-router";
 import { useState } from 'react';
 import "./globals.css";
@@ -25,6 +25,7 @@ export default function RootLayout() {
         <Stack.Screen name="media/movies/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="auth/user" options={{ headerShown: false }} />
         <Stack.Screen name="media/profiles/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="media/player/offline/[filePath]" options={{ headerShown: false }} />
         <Stack.Screen name="media/series/[id]" options={{ headerShown: false }} />
         <Stack.Screen name="features/other/upcoming-series" options={{ headerShown: false }} />
         <Stack.Screen name="features/other/genre" options={{ headerShown: false }} />

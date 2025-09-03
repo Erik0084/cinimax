@@ -49,8 +49,13 @@ const DownloadCard = ({ item }) => {
     };
     
     const handlePlayDownload = () => {
-        if (isCompleted && item.jellyfinId) {
-            router.push(`/media/player/${item.jellyfinId}`);
+        if (isCompleted && item.filePath) {
+            // Use offline video player for downloaded content
+            const encodedFilePath = encodeURIComponent(item.filePath);
+            const encodedTitle = encodeURIComponent(item.title || 'Offline Video');
+            const encodedImage = item.image ? encodeURIComponent(item.image) : '';
+            
+            router.push(`/media/player/offline/${encodedFilePath}?title=${encodedTitle}&image=${encodedImage}`);
         }
     };
     

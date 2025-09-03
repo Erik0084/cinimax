@@ -1,11 +1,17 @@
 // app/series/[id].jsx
 
 import { Icons } from "@/constants/icons";
+import { useDownloads } from "@/contexts/DownloadContext";
 import Player from "@components/business/player/Player";
 import TrailerPlayer from "@components/business/player/TrailerPlayer";
 import EpisodeList from "@components/ui/cards/EpisodeCard";
-import { fetchAllSeries, JELLYFIN_URL } from "@utils/api/useJellyfin";
-import { useLocalSearchParams } from "expo-router";
+import {
+  fetchAllSeries,
+  fetchEpisodes,
+  fetchSeasons,
+  JELLYFIN_URL,
+} from "@utils/api/useJellyfin";
+import { router, useLocalSearchParams } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect, useState } from "react";
 import {
@@ -19,12 +25,59 @@ import {
 
 const SeriesDetail = () => {
   const { id } = useLocalSearchParams(); // series id
+  const { downloads } = useDownloads();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayingTrailer, setIsPlayingTrailer] = useState(false);
   const [seriesData, setSeriesData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentEpisodeId, setCurrentEpisodeId] = useState(null);
   const [closePlayer, setClosePlayer] = useState(false);
+
+  // Helper function to check if an episode is downloaded
+  const isEpisodeDownloaded = (episodeId) => {
+    console.log("🔍 Checking if episode is downloaded:", episodeId);
+    console.log("📦 Available downloads:", downloads);
+
+    // Look for download by jellyfinId or itemId (not the download id)
+    const download = downloads.find(
+      (d) => d.jellyfinId === episodeId || d.itemId === episodeId
+    );
+    console.log("🎯 Found download for episode:", download);
+
+    const isDownloaded =
+      download && download.status === "completed" && download.filePath;
+    console.log("✅ Is episode downloaded?", isDownloaded);
+
+    return isDownloaded;
+  };
+
+  // Helper function to play episode (either offline or online)
+  const playEpisode = (episodeId) => {
+    console.log("🎬 Playing episode:", episodeId);
+
+    if (isEpisodeDownloaded(episodeId)) {
+      const download = downloads.find(
+        (d) => d.jellyfinId === episodeId || d.itemId === episodeId
+      );
+      console.log(
+        "🎥 PLAYING OFFLINE - Downloaded video found:",
+        download.filePath
+      );
+
+      // Navigate to offline player with the file path
+      router.push(
+        `/media/player/offline/${encodeURIComponent(download.filePath)}`
+      );
+    } else {
+      console.log(
+        "🌐 PLAYING ONLINE - No download found, streaming from server"
+      );
+
+      // Play online as usual
+      setCurrentEpisodeId(episodeId);
+      setIsPlaying(true);
+    }
+  };
 
   // Fetch series data
   useEffect(() => {
@@ -63,9 +116,37 @@ const SeriesDetail = () => {
     }
   }, [isPlaying, isPlayingTrailer]);
 
-  const handlePlayPress = () => {
-    setCurrentEpisodeId(id); // Use series ID as fallback
-    setIsPlaying(true);
+  const handlePlayPress = async () => {
+    try {
+      // Fetch seasons for this series
+      const seasons = await fetchSeasons(id);
+      if (seasons.length === 0) {
+        console.warn("No seasons found for this series");
+        // Fallback to series ID if no seasons
+        playEpisode(id);
+        return;
+      }
+
+      // Get the first season
+      const firstSeason = seasons[0];
+
+      // Fetch episodes for the first season
+      const episodes = await fetchEpisodes(id, firstSeason.Id);
+      if (episodes.length === 0) {
+        console.warn("No episodes found for the first season");
+        // Fallback to series ID if no episodes
+        playEpisode(id);
+        return;
+      }
+
+      // Play the first episode (check if downloaded first)
+      const firstEpisode = episodes[0];
+      playEpisode(firstEpisode.Id);
+    } catch (error) {
+      console.error("Failed to fetch first episode:", error);
+      // Fallback to series ID on error
+      playEpisode(id);
+    }
   };
 
   const handleTrailerPress = () => {
@@ -73,8 +154,7 @@ const SeriesDetail = () => {
   };
 
   const handleEpisodePlay = (episodeId) => {
-    setCurrentEpisodeId(episodeId);
-    setIsPlaying(true);
+    playEpisode(episodeId);
   };
 
   const handleClosePlayer = () => {
@@ -126,7 +206,7 @@ const SeriesDetail = () => {
     );
   }
 
-  return ( 
+  return (
     <ScrollView className="flex-1 bg-black">
       {/* Background Image and Overlay */}
       <View className="relative w-full h-[74vh]">

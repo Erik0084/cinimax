@@ -1,20 +1,25 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
+import { StatusBar } from "react-native-web";
 
 const HeaderScreen = ({ title }) => {
   const router = useRouter();
   return (
-    <View className="flex-row items-center justify-between px-6 py-4 pt-12">
-      <TouchableOpacity
-        onPress={() => router.back()}
-        className="w-10 h-10 items-center justify-center"
-      >
-        <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-      </TouchableOpacity>
-      <Text className="text-white text-lg font-semibold flex-1 text-center">
-        {title}
-      </Text>
+    <View className="flex-row items-center justify-between mb-4 mt-4">
+      <StatusBar barStyle="light-content" backgroundColor="#0F0F23" />
+      <View className="flex-row items-center">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="mr-4 p-2 rounded-full bg-card_dark"
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+        <Text className="text-white text-xl font-bold">
+          {decodeURIComponent(title)}
+        </Text>
+      </View>
     </View>
   );
 };

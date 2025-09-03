@@ -191,3 +191,25 @@ export const fetchRecentSeries = async () => {
     return [];
   }
 };
+
+// fetch all movies
+export const fetchAllMovies = async () => {
+  try {
+    const response = await fetch(
+      `${JELLYFIN_URL}/Items?api_key=${API_KEY}&userId=${USER_ID}&IncludeItemTypes=Movie&Recursive=true&Fields=BasicSyncInfo,PrimaryImageAspectRatio,ProductionYear,Genres,Overview,CommunityRating&SortBy=SortName&SortOrder=Ascending`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await response.json();
+    return data.Items || [];
+  } catch (error) {
+    console.error("Error fetching all movies:", error);
+    return [];
+  }
+};

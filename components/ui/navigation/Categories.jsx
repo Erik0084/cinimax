@@ -38,7 +38,7 @@ const Categories = ({ title }) => {
         contentContainerStyle={{ paddingHorizontal: 0 }}
       >
         {categories.map((category, _index) => (
-          <Link href={`/other/upcoming-series?category=${category}`} asChild>
+          <Link href={`/features/other/upcoming-series?category=${category}`} asChild>
             <TouchableOpacity
               key={_index}
               className={`py-[8px] mr-2 rounded-lg min-w-[80px] flex-row gap-2 justify-center ${

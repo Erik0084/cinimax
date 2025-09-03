@@ -1,5 +1,10 @@
 // app/series/[id].jsx
 
+import { Icons } from "@/constants/icons";
+import Player from "@components/business/player/Player";
+import TrailerPlayer from "@components/business/player/TrailerPlayer";
+import EpisodeList from "@components/ui/cards/EpisodeCard";
+import { fetchAllSeries, JELLYFIN_URL } from "@utils/api/useJellyfin";
 import { useLocalSearchParams } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect, useState } from "react";
@@ -11,14 +16,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import EpisodeList from "@components/ui/cards/EpisodeCard";
-import Player from "@components/business/player/Player";
-import { Icons } from "@/constants/icons";
-import { fetchAllSeries, JELLYFIN_URL } from "@utils/api/useJellyfin";
 
 const SeriesDetail = () => {
   const { id } = useLocalSearchParams(); // series id
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlayingTrailer, setIsPlayingTrailer] = useState(false);
   const [seriesData, setSeriesData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentEpisodeId, setCurrentEpisodeId] = useState(null);
@@ -56,14 +58,18 @@ const SeriesDetail = () => {
       }
     };
 
-    if (!isPlaying) {
+    if (!isPlaying && !isPlayingTrailer) {
       ensurePortrait();
     }
-  }, [isPlaying]);
+  }, [isPlaying, isPlayingTrailer]);
 
   const handlePlayPress = () => {
     setCurrentEpisodeId(id); // Use series ID as fallback
     setIsPlaying(true);
+  };
+
+  const handleTrailerPress = () => {
+    setIsPlayingTrailer(true);
   };
 
   const handleEpisodePlay = (episodeId) => {
@@ -76,6 +82,14 @@ const SeriesDetail = () => {
     setCurrentEpisodeId(null);
     setClosePlayer(false); // Reset closePlayer state
     // Ensure we return to portrait after closing player
+    ScreenOrientation.lockAsync(
+      ScreenOrientation.OrientationLock.PORTRAIT_UP
+    ).catch(console.warn);
+  };
+
+  const handleCloseTrailer = () => {
+    setIsPlayingTrailer(false);
+    // Ensure we return to portrait after closing trailer
     ScreenOrientation.lockAsync(
       ScreenOrientation.OrientationLock.PORTRAIT_UP
     ).catch(console.warn);
@@ -95,6 +109,18 @@ const SeriesDetail = () => {
           setClosePlayer={setClosePlayer}
           id={currentEpisodeId || id}
           onClose={handleClosePlayer}
+        />
+      </View>
+    );
+  }
+
+  if (isPlayingTrailer) {
+    return (
+      <View className="flex-1 bg-black">
+        <TrailerPlayer
+          seriesId={id}
+          seriesName={seriesData?.Name}
+          onClose={handleCloseTrailer}
         />
       </View>
     );
@@ -173,7 +199,7 @@ const SeriesDetail = () => {
 
             <View className="flex-row justify-around items-center mt-6 px-4">
               <TouchableOpacity
-                className="flex-row items-center bg-blue_accent px-8 py-3 rounded-full flex mr-2 justify-center"
+                className="flex-row items-center bg-blue_accent px-6 py-3 rounded-full flex mr-2 justify-center"
                 onPress={handlePlayPress}
               >
                 <Image
@@ -182,6 +208,17 @@ const SeriesDetail = () => {
                   tintColor="#fff"
                 />
                 <Text className="text-white text-h4 font-bold">Play</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-row items-center bg-grey/20 border border-grey/30 px-4 py-3 rounded-full flex mr-2 justify-center"
+                onPress={handleTrailerPress}
+              >
+                <Image
+                  source={Icons.film}
+                  className="w-4 h-4 mr-1"
+                  tintColor="#fff"
+                />
+                <Text className="text-white text-h5 font-medium">Trailer</Text>
               </TouchableOpacity>
               <TouchableOpacity className="bg-soft p-[12px] rounded-full mx-2">
                 <Image

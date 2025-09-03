@@ -3,7 +3,14 @@ import { useDownloads } from "@/contexts/DownloadContext";
 import HeaderScreen from "@components/layout/HeaderScreen";
 import DownloadCard from "@components/ui/cards/DownloadCard";
 import { router } from "expo-router";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const DownloadScreen = () => {
   const { downloads, clearCompleted, DOWNLOAD_STATES } = useDownloads();
@@ -12,6 +19,7 @@ const DownloadScreen = () => {
 
   return (
     <View className="flex-1 bg-dark px-6">
+      <StatusBar barStyle="light-content" backgroundColor="#0F0F23" />
       {/* Header */}
       <HeaderScreen title="Downloads" />
       {isEmpty ? (

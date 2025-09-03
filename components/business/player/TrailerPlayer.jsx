@@ -1,8 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { API_KEY, JELLYFIN_URL, USER_ID } from "@utils/api/useJellyfin";
+import { fetchSeriesTrailer } from "@utils/api/useJellyfin";
 import { Video } from "expo-av";
-import { router } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -16,12 +15,12 @@ import {
   View,
 } from "react-native";
 
-// Custom Landscape Video Player Component
-const CustomLandscapePlayer = ({
+// Custom Landscape Trailer Player Component
+const CustomLandscapeTrailerPlayer = ({
   videoUrl,
-  mediaInfo,
+  trailerInfo,
   onClose,
-  jellyfinConfig,
+  isRemoteTrailer = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
@@ -47,40 +46,6 @@ const CustomLandscapePlayer = ({
     resetControlsTimeout();
   };
 
-  // Report progress to Jellyfin
-  const reportProgress = async (positionTicks, eventType = "timeupdate") => {
-    try {
-      const { serverUrl, itemId, apiKey, userId } = jellyfinConfig;
-      const endpoint =
-        eventType === "start"
-          ? "Playing"
-          : eventType === "stop"
-          ? "Stopped"
-          : "Progress";
-
-      await fetch(
-        `${serverUrl}/Sessions/Playing/${endpoint}?api_key=${apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `MediaBrowser Token="${apiKey}"`,
-          },
-          body: JSON.stringify({
-            ItemId: itemId,
-            UserId: userId,
-            PositionTicks: positionTicks,
-            IsPaused: !isPlaying,
-            MediaSourceId: itemId,
-            PlayMethod: "DirectStream",
-          }),
-        }
-      );
-    } catch (error) {
-      console.log("Failed to report progress:", error);
-    }
-  };
-
   const handlePlayPause = async () => {
     try {
       if (isPlaying) {
@@ -100,7 +65,6 @@ const CustomLandscapePlayer = ({
     try {
       await videoRef.current?.setPositionAsync(value);
       setCurrentTime(value);
-      reportProgress(Math.floor(value * 10000));
       resetControlsTimeout();
     } catch (error) {
       console.log("Error seeking:", error);
@@ -109,19 +73,12 @@ const CustomLandscapePlayer = ({
 
   const handleClose = async () => {
     try {
-      // Report stop to Jellyfin
-      if (currentTime > 0) {
-        const positionTicks = Math.floor(currentTime * 10000);
-        await reportProgress(positionTicks, "stop");
-      }
-
       // Stop video playback
       await videoRef.current?.pauseAsync();
       await videoRef.current?.unloadAsync();
-
       onClose();
     } catch (error) {
-      console.log("Error closing player:", error);
+      console.log("Error closing trailer player:", error);
       onClose();
     }
   };
@@ -146,12 +103,6 @@ const CustomLandscapePlayer = ({
       setDuration(status.durationMillis || 0);
       setIsPlaying(status.isPlaying || false);
       setLoading(false);
-
-      // Report progress to Jellyfin
-      if (status.positionMillis) {
-        const positionTicks = Math.floor(status.positionMillis * 10000);
-        reportProgress(positionTicks);
-      }
     }
   };
 
@@ -181,10 +132,13 @@ const CustomLandscapePlayer = ({
         }}
         source={{
           uri: videoUrl,
-          headers: {
-            "User-Agent": "JellyfinApp/1.0.0",
-            Authorization: `MediaBrowser Token="${jellyfinConfig.apiKey}"`,
-          },
+          ...(isRemoteTrailer
+            ? {}
+            : {
+                headers: {
+                  "User-Agent": "JellyfinApp/1.0.0",
+                },
+              }),
         }}
         useNativeControls={false}
         resizeMode="contain"
@@ -192,12 +146,11 @@ const CustomLandscapePlayer = ({
         shouldPlay={true}
         onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
         onLoad={(data) => {
-          console.log("Video loaded successfully");
-          reportProgress(0, "start");
+          console.log("Trailer loaded successfully");
           setLoading(false);
         }}
         onError={(error) => {
-          console.error("Video error:", error);
+          console.error("Trailer error:", error);
           setLoading(false);
         }}
       />
@@ -206,8 +159,10 @@ const CustomLandscapePlayer = ({
       {loading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#ff6b6b" />
-          <Text style={styles.loadingText}>Loading video...</Text>
-          {mediaInfo && <Text style={styles.mediaTitle}>{mediaInfo.Name}</Text>}
+          <Text style={styles.loadingText}>Loading trailer...</Text>
+          {trailerInfo && (
+            <Text style={styles.mediaTitle}>{trailerInfo.name}</Text>
+          )}
         </View>
       )}
 
@@ -220,16 +175,12 @@ const CustomLandscapePlayer = ({
               <Ionicons name="close" size={28} color="white" />
             </TouchableOpacity>
 
-            {mediaInfo && (
+            {trailerInfo && (
               <View style={styles.mediaInfoTop}>
                 <Text style={styles.mediaTitle} numberOfLines={1}>
-                  {mediaInfo.Name}
+                  {trailerInfo.name}
                 </Text>
-                {mediaInfo.ProductionYear && (
-                  <Text style={styles.mediaYear}>
-                    {mediaInfo.ProductionYear}
-                  </Text>
-                )}
+                <Text style={styles.trailerLabel}>Trailer</Text>
               </View>
             )}
 
@@ -297,20 +248,13 @@ const CustomLandscapePlayer = ({
   );
 };
 
-// Main Player Component
-const Player = ({ id }) => {
-  const [videoUrl, setVideoUrl] = useState(null);
+// Main Trailer Player Component
+const TrailerPlayer = ({ seriesId, seriesName, onClose }) => {
+  const [trailerUrl, setTrailerUrl] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [mediaInfo, setMediaInfo] = useState(null);
+  const [trailerInfo, setTrailerInfo] = useState(null);
+  const [isRemoteTrailer, setIsRemoteTrailer] = useState(false);
   const [screenData, setScreenData] = useState(Dimensions.get("window"));
-
-  // Jellyfin configuration
-  const JELLYFIN_CONFIG = {
-    serverUrl: JELLYFIN_URL,
-    itemId: id,
-    apiKey: API_KEY,
-    userId: USER_ID,
-  };
 
   // Set landscape orientation on component mount
   useEffect(() => {
@@ -350,124 +294,65 @@ const Player = ({ id }) => {
     return () => subscription?.remove();
   }, []);
 
-  // Enhanced Jellyfin stream fetching
+  // Fetch trailer
   useEffect(() => {
-    const fetchJellyfinStream = async () => {
+    const fetchTrailer = async () => {
       try {
-        const { serverUrl, itemId, apiKey, userId } = JELLYFIN_CONFIG;
+        const trailer = await fetchSeriesTrailer(seriesId);
 
-        // Get media info
-        const mediaResponse = await fetch(
-          `${serverUrl}/Users/${userId}/Items/${itemId}?api_key=${apiKey}`,
-          {
-            headers: {
-              Authorization: `MediaBrowser Token="${apiKey}"`,
-            },
-          }
-        );
-
-        if (mediaResponse.ok) {
-          const mediaData = await mediaResponse.json();
-          setMediaInfo(mediaData);
-        }
-
-        // Get playback info for optimal streaming
-        const playbackInfoResponse = await fetch(
-          `${serverUrl}/Items/${itemId}/PlaybackInfo?api_key=${apiKey}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `MediaBrowser Token="${apiKey}"`,
-            },
-            body: JSON.stringify({
-              UserId: userId,
-              MaxStreamingBitrate: 120000000,
-              StartTimeTicks: 0,
-              DeviceProfile: {
-                MaxStreamingBitrate: 120000000,
-                MaxStaticBitrate: 100000000,
-                MusicStreamingTranscodingBitrate: 384000,
-                DirectPlayProfiles: [
-                  {
-                    Container: "mp4,m4v,mkv,avi",
-                    Type: "Video",
-                    VideoCodec: "h264,h265,hevc",
-                    AudioCodec: "aac,mp3,ac3",
-                  },
-                ],
-                TranscodingProfiles: [
-                  {
-                    Container: "ts",
-                    Type: "Video",
-                    VideoCodec: "h264",
-                    AudioCodec: "aac",
-                    Context: "Streaming",
-                    Protocol: "hls",
-                  },
-                ],
-              },
-            }),
-          }
-        );
-
-        if (playbackInfoResponse.ok) {
-          const playbackData = await playbackInfoResponse.json();
-
-          if (
-            playbackData.MediaSources &&
-            playbackData.MediaSources.length > 0
-          ) {
-            const mediaSource = playbackData.MediaSources[0];
-
-            let streamUrl;
-            if (mediaSource.SupportsDirectStream) {
-              streamUrl = `${serverUrl}/Videos/${itemId}/stream?static=true&mediaSourceId=${mediaSource.Id}&api_key=${apiKey}`;
-            } else if (mediaSource.TranscodingUrl) {
-              streamUrl = `${serverUrl}${mediaSource.TranscodingUrl}`;
-            } else {
-              // Fallback to HLS transcoding
-              streamUrl = `${serverUrl}/Videos/${itemId}/master.m3u8?api_key=${apiKey}&mediaSourceId=${mediaSource.Id}`;
-            }
-
-            setVideoUrl(streamUrl);
-          }
+        if (trailer) {
+          setTrailerUrl(trailer.url);
+          setTrailerInfo({
+            name: trailer.name || `${seriesName} Trailer`,
+            id: trailer.id,
+          });
+          setIsRemoteTrailer(trailer.type === "remote");
         } else {
-          // Fallback to direct stream
-          const directStreamUrl = `${serverUrl}/Videos/${itemId}/stream?static=true&api_key=${apiKey}`;
-          setVideoUrl(directStreamUrl);
+          // No trailer found
+          Alert.alert(
+            "No Trailer Available",
+            "Sorry, no trailer is available for this series.",
+            [
+              {
+                text: "OK",
+                onPress: handleClose,
+              },
+            ]
+          );
         }
 
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching video URL:", error);
+        console.error("Error fetching trailer:", error);
         setLoading(false);
 
-        // Fallback to test video
-        const testUrl =
-          "https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4";
-        setVideoUrl(testUrl);
         Alert.alert(
-          "Info",
-          "Using test video due to Jellyfin connection issues"
+          "Error",
+          "Failed to load trailer. Please try again later.",
+          [
+            {
+              text: "OK",
+              onPress: handleClose,
+            },
+          ]
         );
       }
     };
 
-    fetchJellyfinStream();
-  }, [id]);
+    fetchTrailer();
+  }, [seriesId, seriesName]);
 
   const handleClose = async () => {
     try {
-      // Reset orientation before navigating back
+      // Reset orientation before closing
       await ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.PORTRAIT_UP
       );
       StatusBar.setHidden(false);
-      router.back();
+      onClose();
     } catch (error) {
-      console.log("Error closing player:", error);
-      router.back();
+      console.log("Error closing trailer player:", error);
+      onClose();
     }
   };
 
@@ -475,24 +360,29 @@ const Player = ({ id }) => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#ff6b6b" />
-        <Text style={styles.loadingText}>Loading video...</Text>
-        {mediaInfo && <Text style={styles.mediaTitle}>{mediaInfo.Name}</Text>}
+        <Text style={styles.loadingText}>Loading trailer...</Text>
+        {seriesName && (
+          <Text style={styles.mediaTitle}>{seriesName} Trailer</Text>
+        )}
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {videoUrl ? (
-        <CustomLandscapePlayer
-          videoUrl={videoUrl}
-          mediaInfo={mediaInfo}
+      {trailerUrl ? (
+        <CustomLandscapeTrailerPlayer
+          videoUrl={trailerUrl}
+          trailerInfo={trailerInfo}
           onClose={handleClose}
-          jellyfinConfig={JELLYFIN_CONFIG}
+          isRemoteTrailer={isRemoteTrailer}
         />
       ) : (
         <View style={styles.loadingContainer}>
-          <Text style={styles.errorText}>Failed to load video</Text>
+          <Text style={styles.errorText}>No trailer available</Text>
+          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -536,6 +426,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     paddingHorizontal: 20,
+    marginBottom: 20,
   },
   controlsOverlay: {
     position: "absolute",
@@ -559,6 +450,11 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 25,
   },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   mediaInfoTop: {
     flex: 1,
     marginHorizontal: 20,
@@ -569,11 +465,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
-  mediaYear: {
-    color: "#ccc",
+  trailerLabel: {
+    color: "#ff6b6b",
     fontSize: 14,
     textAlign: "center",
     marginTop: 2,
+    fontWeight: "600",
   },
   topRightControls: {
     flexDirection: "row",
@@ -637,4 +534,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Player;
+export default TrailerPlayer;

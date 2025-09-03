@@ -213,3 +213,64 @@ export const fetchAllMovies = async () => {
     return [];
   }
 };
+
+// fetch series trailer
+export const fetchSeriesTrailer = async (seriesId) => {
+  try {
+    const response = await fetch(
+      `${JELLYFIN_URL}/Items/${seriesId}/LocalTrailers?api_key=${API_KEY}&userId=${USER_ID}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // If local trailers exist, return the first one
+    if (data && data.length > 0) {
+      return {
+        id: data[0].Id,
+        name: data[0].Name || `${seriesId} Trailer`,
+        url: `${JELLYFIN_URL}/Videos/${data[0].Id}/stream?api_key=${API_KEY}`,
+        type: 'local'
+      };
+    }
+
+    // If no local trailers, try to get remote trailers
+    const remoteResponse = await fetch(
+      `${JELLYFIN_URL}/Items/${seriesId}/RemoteTrailers?api_key=${API_KEY}`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (remoteResponse.ok) {
+      const remoteData = await remoteResponse.json();
+      if (remoteData && remoteData.length > 0) {
+        return {
+          id: remoteData[0].Url,
+          name: remoteData[0].Name || `${seriesId} Trailer`,
+          url: remoteData[0].Url,
+          type: 'remote'
+        };
+      }
+    }
+
+    return null; // No trailers found
+  } catch (error) {
+    console.error("Error fetching series trailer:", error);
+    return null;
+  }
+};
